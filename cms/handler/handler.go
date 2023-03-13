@@ -5,8 +5,6 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -94,9 +92,7 @@ func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc
 	// })
 
 	// For Template Asset Prefixes
-	workDir, _ := os.Getwd()
-	filesDir := http.Dir(filepath.Join(workDir, "assets/src"))
-	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(filesDir)))
+	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.FS(h.staticFiles))))
 	// r.Handle(assetsPrefixForSubjectEdit+"*", http.StripPrefix(assetsPrefixForSubjectEdit, http.FileServer(filesDir)))
 	// r.Handle(assetsPrefixForSubjectUpdate+"*", http.StripPrefix(assetsPrefixForSubjectUpdate, http.FileServer(filesDir)))
 	// r.Handle(assetsPrefixForStudentEdit+"*", http.StripPrefix(assetsPrefixForStudentEdit, http.FileServer(filesDir)))
@@ -209,8 +205,8 @@ func (h *Handler) ParseTemplates() error {
 		},
 	}).Funcs(sprig.FuncMap())
 
-	newFS := os.DirFS("assets/templates")
-	tmpl := template.Must(templates.ParseFS(newFS, "*/*.html", "*.html"))
+
+	tmpl := template.Must(templates.ParseFS(h.templateFiles, "*/*.html", "*.html"))
 	if tmpl == nil {
 		log.Fatalln("unable to parse templates")
 	}
