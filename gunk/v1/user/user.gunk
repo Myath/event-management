@@ -14,7 +14,7 @@ type User struct {
 	FirstName string    `pb:"2"`
 	LastName  string    `pb:"3"`
 	Username  string    `pb:"4"`
-	EMail     string    `pb:"5"`
+	Email     string    `pb:"5"`
 	Password  string    `pb:"6"`
 	IsAdmin   bool      `pb:"7"`
 	IsActive  bool      `pb:"8"`
@@ -27,7 +27,7 @@ type RegisterRequest struct {
 	FirstName string `pb:"1"`
 	LastName  string `pb:"2"`
 	Username  string `pb:"3"`
-	EMail     string `pb:"4"`
+	Email     string `pb:"4"`
 	Password  string `pb:"5"`
 }
 

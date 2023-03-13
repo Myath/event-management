@@ -39,7 +39,7 @@ func main() {
 			strings.NewReplacer(".", "_"),
 		),
 	)
-	config.SetConfigFile("env/config")
+	config.SetConfigFile("config")
 	config.SetConfigType("ini")
 	config.AutomaticEnv()
 	if err := config.ReadInConfig(); err != nil {
@@ -86,7 +86,7 @@ func main() {
 
 	p := config.GetInt("server.port")
 	baseurl := config.GetString("server.baseurl")
-	url := fmt.Sprintf(":%d", p)
+	url := fmt.Sprintf("%d", p)
 
 	hrmUrl := config.GetString("hrm.url")
 	hrmConn, err := grpc.Dial(

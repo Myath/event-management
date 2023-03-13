@@ -9,7 +9,7 @@ idletime=20
 [database]
 host=127.0.0.1
 port=5432
-dbname=event_hrm
+dbname=event_session
 user=postgres
 password=secret
 sslmode=disable

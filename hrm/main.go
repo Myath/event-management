@@ -2,15 +2,20 @@ package main
 
 import (
 	"embed"
-	"event-management/hrm/storage/postgres"
 	"fmt"
 	"log"
 	"net"
 	"strings"
 
+	userpb "event-management/gunk/v1/user"
+	cu "event-management/hrm/core/user"
+	"event-management/hrm/sevice/user"
+	"event-management/hrm/storage/postgres"
 	"github.com/pressly/goose/v3"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	_ "github.com/lib/pq"
 )
 
 //go:embed migrations
@@ -51,12 +56,12 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	// userCore := cu.NewCoreUser(postgreStorage)
-	// userSvc := user.NewUserSvc(userCore)
-	// userpb.RegisterUserServiceServer(grpcServer, userSvc)
+	userCore := cu.NewCoreUser(postgreStorage)
+	userSvc := user.NewUserSvc(userCore)
+	userpb.RegisterUserServiceServer(grpcServer, userSvc)
 
-	// // start reflection server
-	// reflection.Register(grpcServer)
+	// start reflection server
+	reflection.Register(grpcServer)
 
 	fmt.Println("usermgm server running on: ", lis.Addr())
 	if err := grpcServer.Serve(lis); err != nil {
