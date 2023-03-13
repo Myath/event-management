@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -30,18 +31,22 @@ type Handler struct {
 	hrmSvc hrmService
 	Templates      *template.Template
 	baseurl        string
+	staticFiles fs.FS
+	templateFiles fs.FS
 }
 
 // const (
 // 	adminLoginPath = "/adminLogin"
 // )
 
-func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc.ClientConn, baseurl string) *chi.Mux {
+func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc.ClientConn, baseurl string, staticFiles, templateFiles fs.FS) *chi.Mux {
 	h := &Handler{
 		sessionManager: sm,
 		decoder:        formdecoder,
 		hrmSvc:         hrmService{userpb.NewUserServiceClient(hrmConn)},
 		baseurl:        baseurl,
+		staticFiles:    staticFiles,
+		templateFiles:  templateFiles,
 	}
 
 	h.ParseTemplates()

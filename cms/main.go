@@ -1,7 +1,9 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"net"
 	"net/http"
@@ -14,13 +16,19 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form"
 	"github.com/justinas/nosurf"
-	"github.com/pressly/goose"
+	"github.com/pressly/goose/v3"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	_ "github.com/lib/pq"
 )
+
+//go:embed assets
+var assetFiles embed.FS
+
+//go:embed migrations
+var migrationFiles embed.FS
 
 var sessionManager *scs.SessionManager
 
@@ -40,19 +48,6 @@ func main() {
 
 	decoder := form.NewDecoder()
 
-	postgreStorage, err := utility.NewPostgresStorage(config)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := goose.SetDialect("postgres"); err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := goose.Up(postgreStorage.DB.DB, "migrations"); err != nil {
-		log.Fatalln(err)
-	}
-
 	lt := config.GetDuration("session.lifetime")
 	it := config.GetDuration("session.idletime")
 	sessionManager = scs.New()
@@ -61,6 +56,32 @@ func main() {
 	sessionManager.Cookie.Name = "web-session"
 	sessionManager.Cookie.HttpOnly = true
 	sessionManager.Cookie.Secure = true
+
+	postgreStorage, err := utility.NewPostgresStorage(config)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	goose.SetBaseFS(migrationFiles)
+	if err := goose.SetDialect("postgres"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := goose.Up(postgreStorage.DB.DB, "migrations"); err != nil {
+		log.Fatalln(err)
+	}
+
+	var assetFS = fs.FS(assetFiles)
+	staticFiles, err := fs.Sub(assetFS, "assets/src")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	templateFiles, err := fs.Sub(assetFS, "assets/templates")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
 	sessionManager.Store = utility.NewSQLXStore(postgreStorage.DB)
 
 	p := config.GetInt("server.port")
@@ -76,7 +97,7 @@ func main() {
 		log.Println(err)
 	}
 
-	chi := handler.NewHandler(sessionManager, decoder, hrmConn, baseurl)
+	chi := handler.NewHandler(sessionManager, decoder, hrmConn, baseurl, staticFiles, templateFiles)
 
 	nosurfHandler := nosurf.New(chi)
 
