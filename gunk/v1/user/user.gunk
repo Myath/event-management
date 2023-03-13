@@ -1,0 +1,45 @@
+package userpb
+
+import (
+	"time"
+)
+
+type UserService interface {
+	Register(RegisterRequest) RegisterResponse
+	Login(LoginRequest) LoginResponse
+}
+
+type User struct {
+	ID        int       `pb:"1"`
+	FirstName string    `pb:"2"`
+	LastName  string    `pb:"3"`
+	Username  string    `pb:"4"`
+	EMail     string    `pb:"5"`
+	Password  string    `pb:"6"`
+	IsAdmin   bool      `pb:"7"`
+	IsActive  bool      `pb:"8"`
+	CreatedAt time.Time `pb:"9"`
+	UpdatedAt time.Time `pb:"10"`
+	DeletedAt time.Time `pb:"11"`
+}
+
+type RegisterRequest struct {
+	FirstName string `pb:"1"`
+	LastName  string `pb:"2"`
+	Username  string `pb:"3"`
+	EMail     string `pb:"4"`
+	Password  string `pb:"5"`
+}
+
+type RegisterResponse struct {
+	User User `pb:"1"`
+}
+
+type LoginRequest struct {
+	Username string `pb:"1"`
+	Password string `pb:"2"`
+}
+
+type LoginResponse struct {
+	User User `pb:"1"`
+}
