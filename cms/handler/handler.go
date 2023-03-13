@@ -213,3 +213,5 @@ func (h *Handler) ParseTemplates() error {
 	h.Templates = tmpl
 	return nil
 }
+
+
