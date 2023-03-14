@@ -40,3 +40,18 @@ func (p PostgresStorage) Register(s storage.User) (*storage.User, error) {
 
 	return &s, nil
 }
+
+const getUserByUsernameQuery = `SELECT * FROM users WHERE username=$1 AND deleted_at IS NULL`
+
+func (ps PostgresStorage) GetUserByUsername(usernanme string) (*storage.User, error) {
+	var user storage.User
+	if err := ps.DB.Get(&user, getUserByUsernameQuery, usernanme); err != nil {
+		return nil, err
+	}
+
+	if user.ID == 0 {
+		return nil, fmt.Errorf("unable to find user by username")
+	}
+
+	return &user, nil
+}

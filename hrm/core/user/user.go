@@ -9,6 +9,7 @@ import (
 
 type UserStore interface {
 	Register(s storage.User) (*storage.User, error)
+	GetUserByUsername(usernanme string) (*storage.User, error)
 }
 
 type CoreUser struct{
@@ -38,4 +39,17 @@ func (cu CoreUser) Register(s storage.User) (*storage.User, error){
 	}
 
 	return rUser, nil
+}
+
+func (cu CoreUser) Login(s storage.Login) (*storage.User, error){
+	user, err := cu.store.GetUserByUsername(s.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(s.Password)); err != nil{
+		return nil, err
+	}
+
+	return user, nil
 }

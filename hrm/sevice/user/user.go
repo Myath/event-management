@@ -8,6 +8,7 @@ import (
 
 type UserCore interface {
 	Register(s storage.User) (*storage.User, error)
+	Login(s storage.Login) (*storage.User, error)
 }
 
 type UserSvc struct {
@@ -40,6 +41,35 @@ func (us UserSvc) Register(ctx context.Context, r *userpb.RegisterRequest) (*use
 	}
 
 	return &userpb.RegisterResponse{
+		User: &userpb.User{
+			ID:        int32(u.ID),
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+			Username:  u.Username,
+			Email:     u.Email,
+			Password:  u.Password,
+			IsAdmin:   u.IsAdmin,
+			IsActive:  u.IsActive,
+		},
+	}, nil
+}
+
+func (us UserSvc) Login(ctx context.Context, r *userpb.LoginRequest) (*userpb.LoginResponse, error){
+	loginUser := storage.Login{
+		Username:  r.GetUsername(),
+		Password:  r.GetPassword(),
+	}
+
+	if err := loginUser.Validate(); err != nil {
+		return nil, err //TODO:: will fix when implement this service in cms
+	}
+
+	u, err := us.Core.Login(loginUser)
+	if err != nil{
+		return nil, err
+	}
+
+	return &userpb.LoginResponse{
 		User: &userpb.User{
 			ID:        int32(u.ID),
 			FirstName: u.FirstName,
