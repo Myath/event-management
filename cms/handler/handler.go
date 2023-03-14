@@ -19,18 +19,18 @@ import (
 	"google.golang.org/grpc"
 )
 
-type hrmService struct{
+type hrmService struct {
 	userpb.UserServiceClient
 }
 
 type Handler struct {
 	sessionManager *scs.SessionManager
 	decoder        *form.Decoder
-	hrmSvc hrmService
+	hrmSvc         hrmService
 	Templates      *template.Template
 	baseurl        string
-	staticFiles fs.FS
-	templateFiles fs.FS
+	staticFiles    fs.FS
+	templateFiles  fs.FS
 }
 
 // const (
@@ -205,7 +205,6 @@ func (h *Handler) ParseTemplates() error {
 		},
 	}).Funcs(sprig.FuncMap())
 
-
 	tmpl := template.Must(templates.ParseFS(h.templateFiles, "*.html"))
 	if tmpl == nil {
 		log.Fatalln("unable to parse templates")
@@ -214,5 +213,3 @@ func (h *Handler) ParseTemplates() error {
 	h.Templates = tmpl
 	return nil
 }
-
-
