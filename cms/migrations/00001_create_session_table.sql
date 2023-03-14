@@ -1,9 +1,16 @@
 -- +goose Up
 -- +goose StatementBegin
-SELECT 'up SQL query';
+CREATE TABLE IF NOT EXISTS sessions (
+		token TEXT PRIMARY KEY,
+		data BYTEA NOT NULL,
+		expiry TIMESTAMPTZ NOT NULL
+	);
+	
+CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions (expiry);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP INDEX IF EXISTS sessions_expiry_idx;
+DROP TABLE IF EXISTS sessions ;
 -- +goose StatementEnd
