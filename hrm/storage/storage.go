@@ -22,6 +22,10 @@ type User struct {
 	DeletedAt sql.NullTime `json:"deleted_at" db:"deleted_at"`
 }
 
+type UserFilter struct {
+	SearchTerm string
+}
+
 func (u User) Validate() error {
 	return validation.ValidateStruct(&u,
 		validation.Field(&u.FirstName,
@@ -58,3 +62,5 @@ func (l Login) Validate() error {
 		),
 	)
 }
+
+

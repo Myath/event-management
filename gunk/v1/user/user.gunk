@@ -7,6 +7,10 @@ import (
 type UserService interface {
 	Register(RegisterRequest) RegisterResponse
 	Login(LoginRequest) LoginResponse
+	EditUser(EditUserRequest) EditUserResponse
+	UpdateUser(UpdateUserRequest) UpdateUserResponse
+	DeleteUser(DeleteUserRequest) DeleteUserResponse
+	ListUser(ListUserRequest) ListUserResponse
 }
 
 type User struct {
@@ -21,6 +25,11 @@ type User struct {
 	CreatedAt time.Time `pb:"9"`
 	UpdatedAt time.Time `pb:"10"`
 	DeletedAt time.Time `pb:"11"`
+}
+
+type UserFilterList struct {
+	AllUser []User `pb:"1"`
+	SearchTerm      string       `pb:"2"`
 }
 
 type RegisterRequest struct {
@@ -42,4 +51,40 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	User User `pb:"1"`
+}
+
+type EditUserRequest struct {
+	ID int `pb:"1"`
+}
+
+type EditUserResponse struct {
+	User User `pb:"1"`
+}
+
+type UpdateUserRequest struct {
+	ID        int       `pb:"1"`
+	FirstName string    `pb:"2"`
+	LastName  string    `pb:"3"`
+	Username  string    `pb:"4"`
+	Email     string    `pb:"5"`
+	Password  string    `pb:"6"`
+	IsActive  bool      `pb:"7"`
+}
+
+type UpdateUserResponse struct {
+	User User `pb:"1"`
+}
+
+type DeleteUserRequest struct {
+	ID int `pb:"1"`
+}
+
+type DeleteUserResponse struct {}
+
+type ListUserRequest struct {
+	SearchTerm string `pb:"1"`
+}
+
+type ListUserResponse struct {
+	UserFilterList UserFilterList `pb:"1"`
 }
