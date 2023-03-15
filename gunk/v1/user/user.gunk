@@ -28,8 +28,8 @@ type User struct {
 }
 
 type UserFilterList struct {
-	AllUser []User `pb:"1"`
-	SearchTerm      string       `pb:"2"`
+	AllUser    []User `pb:"1"`
+	SearchTerm string `pb:"2"`
 }
 
 type RegisterRequest struct {
@@ -62,13 +62,13 @@ type EditUserResponse struct {
 }
 
 type UpdateUserRequest struct {
-	ID        int       `pb:"1"`
-	FirstName string    `pb:"2"`
-	LastName  string    `pb:"3"`
-	Username  string    `pb:"4"`
-	Email     string    `pb:"5"`
-	Password  string    `pb:"6"`
-	IsActive  bool      `pb:"7"`
+	ID        int    `pb:"1"`
+	FirstName string `pb:"2"`
+	LastName  string `pb:"3"`
+	Username  string `pb:"4"`
+	Email     string `pb:"5"`
+	Password  string `pb:"6"`
+	IsActive  bool   `pb:"7"`
 }
 
 type UpdateUserResponse struct {
@@ -79,7 +79,7 @@ type DeleteUserRequest struct {
 	ID int `pb:"1"`
 }
 
-type DeleteUserResponse struct {}
+type DeleteUserResponse struct{}
 
 type ListUserRequest struct {
 	SearchTerm string `pb:"1"`

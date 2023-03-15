@@ -79,7 +79,7 @@ func (cu CoreUser) UpdateUser(s storage.User) (*storage.User, error){
 	}
 
 	if rUser == nil {
-		return nil, fmt.Errorf("unable to register")
+		return nil, fmt.Errorf("unable to update user")
 	}
 
 	return rUser, nil

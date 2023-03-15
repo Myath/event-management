@@ -63,4 +63,18 @@ func (l Login) Validate() error {
 	)
 }
 
+type EventTypes struct {
+	ID        int          `json:"id" form:"-" db:"id"`
+	EventName string       `json:"event_name" db:"event_name"`
+	CreatedAt time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at" db:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at" db:"deleted_at"`
+}
 
+func (e EventTypes) Validate() error{
+	return validation.ValidateStruct(&e,
+		validation.Field(&e.EventName,
+			validation.Required.Error("The event name is required."),
+		),
+	)
+}
