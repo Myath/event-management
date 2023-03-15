@@ -1,0 +1,44 @@
+package eventpb
+
+import (
+	"time"
+)
+
+type EventService interface {
+	CreateEventType(CreateEventTypeRequest) CreateEventTypeResponse
+	EditEventType(EditEventTypeRequest) EditEventTypeResponse
+	UpdateEventType(UpdateEventTypeRequest) UpdateEventTypeResponse
+}
+
+type EventTypes struct {
+	ID        int       `pb:"1"`
+	EventName string    `pb:"2"`
+	CreatedAt time.Time `pb:"3"`
+	UpdatedAt time.Time `pb:"4"`
+	DeletedAt time.Time `pb:"5"`
+}
+
+type CreateEventTypeRequest struct {
+	EventName string `pb:"1"`
+}
+
+type CreateEventTypeResponse struct {
+	EventTypes EventTypes `pb:"1"`
+}
+
+type EditEventTypeRequest struct {
+	ID int `pb:"1"`
+}
+
+type EditEventTypeResponse struct {
+	EventTypes EventTypes `pb:"1"`
+}
+
+type UpdateEventTypeRequest struct {
+	ID        int       `pb:"1"`
+	EventName string    `pb:"2"`
+}
+
+type UpdateEventTypeResponse struct {
+	EventTypes EventTypes `pb:"1"`
+}

@@ -7,15 +7,19 @@ import (
 	"net"
 	"strings"
 
+	eventpb "event-management/gunk/v1/event"
 	userpb "event-management/gunk/v1/user"
 	cu "event-management/hrm/core/user"
+	ev "event-management/hrm/core/event"
 	"event-management/hrm/sevice/user"
+	"event-management/hrm/sevice/event"
 	"event-management/hrm/storage/postgres"
+
+	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	_ "github.com/lib/pq"
 )
 
 //go:embed migrations
@@ -59,6 +63,10 @@ func main() {
 	userCore := cu.NewCoreUser(postgreStorage)
 	userSvc := user.NewUserSvc(userCore)
 	userpb.RegisterUserServiceServer(grpcServer, userSvc)
+
+	eventCore := ev.NewCoreEvent(postgreStorage)
+	eventSvc := event.NewEventSvc(eventCore)
+	eventpb.RegisterEventServiceServer(grpcServer,eventSvc)
 
 	// start reflection server
 	reflection.Register(grpcServer)

@@ -74,7 +74,8 @@ const updateUserQuery = `UPDATE users
 		username = COALESCE(NULLIF(:username, ''), username),
 		email = COALESCE(NULLIF(:email, ''), email),
 		password = COALESCE(NULLIF(:password, ''), password),
-		is_active = :is_active
+		is_active = :is_active,
+		updated_at = CURRENT_TIMESTAMP
 		WHERE id = :id
 		RETURNING *;
 	`
