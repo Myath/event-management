@@ -8,11 +8,14 @@ import (
 	"strings"
 
 	eventpb "event-management/gunk/v1/event"
+	eventTypepb "event-management/gunk/v1/eventType"
 	userpb "event-management/gunk/v1/user"
-	cu "event-management/hrm/core/user"
+	et "event-management/hrm/core/eventType"
 	ev "event-management/hrm/core/event"
-	"event-management/hrm/sevice/user"
+	cu "event-management/hrm/core/user"
+	"event-management/hrm/sevice/eventType"
 	"event-management/hrm/sevice/event"
+	"event-management/hrm/sevice/user"
 	"event-management/hrm/storage/postgres"
 
 	_ "github.com/lib/pq"
@@ -63,6 +66,10 @@ func main() {
 	userCore := cu.NewCoreUser(postgreStorage)
 	userSvc := user.NewUserSvc(userCore)
 	userpb.RegisterUserServiceServer(grpcServer, userSvc)
+
+	eventTypeCore := et.NewCoreEventType(postgreStorage)
+	eventTypeSvc := eventType.NewEventTypeSvc(eventTypeCore)
+	eventTypepb.RegisterEventTypeServiceServer(grpcServer,eventTypeSvc)
 
 	eventCore := ev.NewCoreEvent(postgreStorage)
 	eventSvc := event.NewEventSvc(eventCore)

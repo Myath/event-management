@@ -5,12 +5,9 @@ import (
 	"fmt"
 )
 
+
 type EventStore interface {
-	CreateEventType(s storage.EventTypes) (*storage.EventTypes, error)
-	GetEventTypeByID(id int) (*storage.EventTypes, error)
-	UpdateEventType(s storage.EventTypes) (*storage.EventTypes, error)
-	DeleteEventTypeByID(id int) error
-	EventTypeList(uf storage.EventTypesFilter) ([]storage.EventTypes, error)
+	InsertEvent(s storage.Event) (*storage.Event, error)
 }
 
 type CoreEvent struct {
@@ -23,57 +20,20 @@ func NewCoreEvent (es EventStore) *CoreEvent{
 	}
 }
 
-func (ce CoreEvent) CreateEventType(s storage.EventTypes) (*storage.EventTypes, error){
-	eventType, err := ce.store.CreateEventType(s)
+func (ce CoreEvent) InsertEvent(s storage.Event) (*storage.Event, error){
+	fmt.Println("=========cor=================")
+	fmt.Println(s.PublishedAt)
+	fmt.Println("==========================")
+	event , err := ce.store.InsertEvent(s)
 	if err != nil {
 		return nil, err
 	}
 
-	if eventType == nil {
-		return nil, fmt.Errorf("unable to register")
+	if event == nil {
+		return nil, fmt.Errorf("unable to insert event")
 	}
-
-	return eventType, nil
-}
-
-func (ce CoreEvent) EditEventType(s storage.EventTypes) (*storage.EventTypes, error){
-	eventType, err := ce.store.GetEventTypeByID(s.ID)
-	if err != nil {
-		return nil, err
-	}
-	return eventType, nil
-
-}
-
-func (ce CoreEvent) UpdateEventType(s storage.EventTypes) (*storage.EventTypes, error){
-	eventType, err := ce.store.UpdateEventType(s)
-	if err != nil {
-		return nil, err
-	}
-
-	if eventType == nil {
-		return nil, fmt.Errorf("unable to update eventType")
-	}
-
-	return eventType, nil
-}
-
-func (ce CoreEvent) DeleteEventType(s storage.EventTypes) error{
-	if err := ce.store.DeleteEventTypeByID(s.ID); err != nil {
-		return nil
-	}
-	return nil
-}
-
-func (ce CoreEvent) EventTypeListWithFilter (s storage.EventTypesFilter) ([]storage.EventTypes, error){
-	uf := storage.EventTypesFilter{
-		SearchTerm: s.SearchTerm,
-	}
-
-	eventTypeList, err := ce.store.EventTypeList(uf)
-	if err != nil {
-		return nil, err
-	}
-
-	return eventTypeList, nil
+	fmt.Println("==========================")
+	fmt.Println(event.PublishedAt)
+	fmt.Println("==========================")
+	return event, nil
 }

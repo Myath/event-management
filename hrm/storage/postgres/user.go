@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-const insertRegisterQuery = `
+const registerQuery = `
 	INSERT INTO users(
 		first_name,
 		last_name,
@@ -25,7 +25,7 @@ const insertRegisterQuery = `
 
 func (p PostgresStorage) Register(s storage.User) (*storage.User, error) {
 
-	stmt, err := p.DB.PrepareNamed(insertRegisterQuery)
+	stmt, err := p.DB.PrepareNamed(registerQuery)
 	if err != nil {
 		log.Fatalln(err)
 	}

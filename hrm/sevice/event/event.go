@@ -4,14 +4,13 @@ import (
 	"context"
 	eventpb "event-management/gunk/v1/event"
 	"event-management/hrm/storage"
+	"fmt"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type EventCore interface {
-	CreateEventType(s storage.EventTypes) (*storage.EventTypes, error)
-	EditEventType(s storage.EventTypes) (*storage.EventTypes, error)
-	UpdateEventType(s storage.EventTypes) (*storage.EventTypes, error)
-	DeleteEventType(s storage.EventTypes) error
-	EventTypeListWithFilter(s storage.EventTypesFilter) ([]storage.EventTypes, error)
+	InsertEvent(s storage.Event) (*storage.Event, error)
 }
 
 type EventSvc struct {
@@ -25,105 +24,42 @@ func NewEventSvc(ec EventCore) *EventSvc {
 	}
 }
 
-func (es EventSvc) CreateEventType(ctx context.Context, r *eventpb.CreateEventTypeRequest) (*eventpb.CreateEventTypeResponse, error) {
-	event := storage.EventTypes{
-		EventName: r.GetEventName(),
+func (es EventSvc) CreateEvent(ctx context.Context, r *eventpb.CreateEventRequest) (*eventpb.CreateEventResponse, error){
+	fmt.Println("==========ssssssss===============")
+	fmt.Println(r.GetPublishedAt().AsTime())
+	fmt.Println(r.GetStartAt())
+	fmt.Println("=========================")
+	event := storage.Event{
+		EventTypeId: int(r.GetEventTypeId()),
+		EventName:   r.GetEventName(),
+		Description: r.GetDescription(),
+		Location:    r.GetLocation(),
+		StartAt:     r.GetStartAt().AsTime(),
+		EndAt:       r.GetEndAt().AsTime(),
+		PublishedAt: r.GetPublishedAt().AsTime(),
 	}
 
 	if err := event.Validate(); err != nil {
 		return nil, err //TODO:: will fix when implement this service in cms
 	}
 
-	et, err := es.Core.CreateEventType(event)
+	et, err := es.Core.InsertEvent(event)
 	if err != nil {
 		return nil, err
 	}
-
-	return &eventpb.CreateEventTypeResponse{
-		EventTypes: &eventpb.EventTypes{
-			ID:        int32(et.ID),
-			EventName: event.EventName,
-		},
-	}, nil
-}
-
-func (es EventSvc) EditEventType(ctx context.Context, r *eventpb.EditEventTypeRequest) (*eventpb.EditEventTypeResponse, error) {
-	eventTypeID := storage.EventTypes{
-		ID: int(r.GetID()),
-	}
-
-	et, err := es.Core.EditEventType(eventTypeID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &eventpb.EditEventTypeResponse{
-		EventTypes: &eventpb.EventTypes{
-			ID:        int32(et.ID),
-			EventName: et.EventName,
-		},
-	}, nil
-}
-
-func (es EventSvc) UpdateEventType(ctx context.Context, r *eventpb.UpdateEventTypeRequest) (*eventpb.UpdateEventTypeResponse, error) {
-	eventType := storage.EventTypes{
-		ID:        int(r.GetID()),
-		EventName: r.GetEventName(),
-	}
-
-	if err := eventType.Validate(); err != nil {
-		return nil, err //TODO:: will fix when implement this service in cms
-	}
-
-	et, err := es.Core.UpdateEventType(eventType)
-	if err != nil {
-		return nil, err
-	}
-
-	return &eventpb.UpdateEventTypeResponse{
-		EventTypes: &eventpb.EventTypes{
-			ID:        int32(et.ID),
-			EventName: et.EventName,
-		},
-	}, nil
-}
-
-func (es EventSvc) DeleteEventType(ctx context.Context, r *eventpb.DeleteEventTypeRequest) (*eventpb.DeleteEventTypeResponse, error) {
-	eventType := storage.EventTypes{
-		ID: int(r.ID),
-	}
-
-	err := es.Core.DeleteEventType(eventType)
-	if err != nil {
-		return nil, err
-	}
-
-	return &eventpb.DeleteEventTypeResponse{}, nil
-}
-
-func (es EventSvc) EventTypeList(ctx context.Context, r *eventpb.EventTypeListRequest) (*eventpb.EventTypeListResponse, error) {
-	eventTypeList := storage.EventTypesFilter{
-		SearchTerm: r.GetSearchTerm(),
-	}
-
-	et, err := es.Core.EventTypeListWithFilter(eventTypeList)
-	if err != nil {
-		return nil, err
-	}
-
-	var allEventType []*eventpb.EventTypes
-	for _, ae := range et {
-		eventType := &eventpb.EventTypes{
-			ID:        int32(ae.ID),
-			EventName: ae.EventName,
-		}
-		allEventType = append(allEventType, eventType)
-	}
-
-	return &eventpb.EventTypeListResponse{
-		EventTypeFilterList: &eventpb.EventTypeFilterList{
-			AllEventType: allEventType,
-			SearchTerm:   eventTypeList.SearchTerm,
+	fmt.Println("===========ssssssssssssss==============<<<<<<<<<<<<<<<<")
+	fmt.Println(et.PublishedAt)
+	fmt.Println("=========================")
+	return &eventpb.CreateEventResponse{
+		Event: &eventpb.Event{
+			ID:          int32(et.ID),
+			EventTypeId: int32(et.EventTypeId),
+			EventName:   et.EventName,
+			Description: et.Description,
+			Location:    et.Location,
+			StartAt:     timestamppb.New(et.StartAt),
+			EndAt:       timestamppb.New(et.EndAt),
+			PublishedAt: timestamppb.New(et.PublishedAt),
 		},
 	}, nil
 }

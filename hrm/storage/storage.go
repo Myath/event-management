@@ -64,21 +64,60 @@ func (l Login) Validate() error {
 }
 
 type EventTypes struct {
-	ID        int          `json:"id" form:"-" db:"id"`
-	EventName string       `json:"event_name" db:"event_name"`
-	CreatedAt time.Time    `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at" db:"updated_at"`
-	DeletedAt sql.NullTime `json:"deleted_at" db:"deleted_at"`
+	ID            int          `json:"id" form:"-" db:"id"`
+	EventTypeName string       `json:"event_type_name" db:"event_type_name"`
+	CreatedAt     time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at" db:"updated_at"`
+	DeletedAt     sql.NullTime `json:"deleted_at" db:"deleted_at"`
 }
 
 type EventTypesFilter struct {
 	SearchTerm string
 }
 
-func (e EventTypes) Validate() error{
+func (e EventTypes) Validate() error {
 	return validation.ValidateStruct(&e,
-		validation.Field(&e.EventName,
+		validation.Field(&e.EventTypeName,
 			validation.Required.Error("The event name is required."),
 		),
 	)
 }
+
+type Event struct {
+	ID          int          `json:"id" form:"-" db:"id"`
+	EventTypeId int          `json:"event_type_id" db:"event_type_id"`
+	EventName   string       `json:"event_name" db:"event_name"`
+	Description string       `json:"description" db:"description"`
+	Location    string       `json:"location" db:"location"`
+	StartAt     time.Time    `json:"start_at" db:"start_at"`
+	EndAt       time.Time    `json:"end_at" db:"end_at"`
+	PublishedAt time.Time    `json:"published_at" db:"published_at"`
+	CreatedAt   time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at" db:"updated_at"`
+	DeletedAt   sql.NullTime `json:"deleted_at" db:"deleted_at"`
+}
+
+
+func (e Event) Validate() error {
+	return validation.ValidateStruct(&e,
+		validation.Field(&e.EventTypeId,
+			validation.Required.Error("The eventTypeId is required."),
+		),
+		validation.Field(&e.EventName,
+			validation.Required.Error("The event name field is required."),
+		),
+		validation.Field(&e.Description,
+			validation.Required.When(e.ID == 0).Error("The description field is required."),
+		),
+		validation.Field(&e.Location,
+			validation.Required.When(e.ID == 0).Error("The location field is required."),
+		),
+		validation.Field(&e.StartAt,
+			validation.Required.When(e.ID == 0).Error("The start time field is required."),
+		),
+		validation.Field(&e.EndAt,
+			validation.Required.When(e.ID == 0).Error("The end time field is required."),
+		),
+	)
+}
+
