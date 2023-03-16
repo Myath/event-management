@@ -10,6 +10,8 @@ type EventCore interface {
 	CreateEventType(s storage.EventTypes) (*storage.EventTypes, error)
 	EditEventType(s storage.EventTypes) (*storage.EventTypes, error)
 	UpdateEventType(s storage.EventTypes) (*storage.EventTypes, error)
+	DeleteEventType(s storage.EventTypes) error
+	EventTypeListWithFilter(s storage.EventTypesFilter) ([]storage.EventTypes, error)
 }
 
 type EventSvc struct {
@@ -23,7 +25,7 @@ func NewEventSvc(ec EventCore) *EventSvc {
 	}
 }
 
-func (es EventSvc) CreateEventType(ctx context.Context, r *eventpb.CreateEventTypeRequest) (*eventpb.CreateEventTypeResponse, error){
+func (es EventSvc) CreateEventType(ctx context.Context, r *eventpb.CreateEventTypeRequest) (*eventpb.CreateEventTypeResponse, error) {
 	event := storage.EventTypes{
 		EventName: r.GetEventName(),
 	}
@@ -45,7 +47,7 @@ func (es EventSvc) CreateEventType(ctx context.Context, r *eventpb.CreateEventTy
 	}, nil
 }
 
-func (es EventSvc) EditEventType(ctx context.Context, r *eventpb.EditEventTypeRequest) (*eventpb.EditEventTypeResponse, error){
+func (es EventSvc) EditEventType(ctx context.Context, r *eventpb.EditEventTypeRequest) (*eventpb.EditEventTypeResponse, error) {
 	eventTypeID := storage.EventTypes{
 		ID: int(r.GetID()),
 	}
@@ -63,7 +65,7 @@ func (es EventSvc) EditEventType(ctx context.Context, r *eventpb.EditEventTypeRe
 	}, nil
 }
 
-func (es EventSvc) UpdateEventType(ctx context.Context, r *eventpb.UpdateEventTypeRequest) (*eventpb.UpdateEventTypeResponse, error){
+func (es EventSvc) UpdateEventType(ctx context.Context, r *eventpb.UpdateEventTypeRequest) (*eventpb.UpdateEventTypeResponse, error) {
 	eventType := storage.EventTypes{
 		ID:        int(r.GetID()),
 		EventName: r.GetEventName(),
@@ -86,3 +88,42 @@ func (es EventSvc) UpdateEventType(ctx context.Context, r *eventpb.UpdateEventTy
 	}, nil
 }
 
+func (es EventSvc) DeleteEventType(ctx context.Context, r *eventpb.DeleteEventTypeRequest) (*eventpb.DeleteEventTypeResponse, error) {
+	eventType := storage.EventTypes{
+		ID: int(r.ID),
+	}
+
+	err := es.Core.DeleteEventType(eventType)
+	if err != nil {
+		return nil, err
+	}
+
+	return &eventpb.DeleteEventTypeResponse{}, nil
+}
+
+func (es EventSvc) EventTypeList(ctx context.Context, r *eventpb.EventTypeListRequest) (*eventpb.EventTypeListResponse, error) {
+	eventTypeList := storage.EventTypesFilter{
+		SearchTerm: r.GetSearchTerm(),
+	}
+
+	et, err := es.Core.EventTypeListWithFilter(eventTypeList)
+	if err != nil {
+		return nil, err
+	}
+
+	var allEventType []*eventpb.EventTypes
+	for _, ae := range et {
+		eventType := &eventpb.EventTypes{
+			ID:        int32(ae.ID),
+			EventName: ae.EventName,
+		}
+		allEventType = append(allEventType, eventType)
+	}
+
+	return &eventpb.EventTypeListResponse{
+		EventTypeFilterList: &eventpb.EventTypeFilterList{
+			AllEventType: allEventType,
+			SearchTerm:   eventTypeList.SearchTerm,
+		},
+	}, nil
+}

@@ -71,6 +71,10 @@ type EventTypes struct {
 	DeletedAt sql.NullTime `json:"deleted_at" db:"deleted_at"`
 }
 
+type EventTypesFilter struct {
+	SearchTerm string
+}
+
 func (e EventTypes) Validate() error{
 	return validation.ValidateStruct(&e,
 		validation.Field(&e.EventName,
