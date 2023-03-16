@@ -5,61 +5,33 @@ import (
 )
 
 type EventService interface {
-	CreateEventType(CreateEventTypeRequest) CreateEventTypeResponse
-	EditEventType(EditEventTypeRequest) EditEventTypeResponse
-	UpdateEventType(UpdateEventTypeRequest) UpdateEventTypeResponse
-	DeleteEventType(DeleteEventTypeRequest) DeleteEventTypeResponse
-	EventTypeList(EventTypeListRequest) EventTypeListResponse
+	CreateEvent(CreateEventRequest) CreateEventResponse
 }
 
-type EventTypes struct {
-	ID        int       `pb:"1"`
-	EventName string    `pb:"2"`
-	CreatedAt time.Time `pb:"3"`
-	UpdatedAt time.Time `pb:"4"`
-	DeletedAt time.Time `pb:"5"`
+type Event struct {
+	ID          int       `pb:"1"`
+	EventTypeId int       `pb:"2"`
+	EventName   string    `pb:"3"`
+	Description string    `pb:"4"`
+	Location    string    `pb:"5"`
+	StartAt     time.Time `pb:"6"`
+	EndAt       time.Time `pb:"7"`
+	PublishedAt time.Time `pb:"8"`
+	CreatedAt   time.Time `pb:"9"`
+	UpdatedAt   time.Time `pb:"10"`
+	DeletedAt   time.Time `pb:"11"`
 }
 
-type EventTypeFilterList struct {
-	AllEventType []EventTypes `pb:"1"`
-	SearchTerm   string       `pb:"2"`
+type CreateEventRequest struct {
+	EventTypeId int       `pb:"1"`
+	EventName   string    `pb:"2"`
+	Description string    `pb:"3"`
+	Location    string    `pb:"4"`
+	StartAt     time.Time `pb:"5"`
+	EndAt       time.Time `pb:"6"`
+	PublishedAt time.Time `pb:"7"`
 }
 
-type CreateEventTypeRequest struct {
-	EventName string `pb:"1"`
-}
-
-type CreateEventTypeResponse struct {
-	EventTypes EventTypes `pb:"1"`
-}
-
-type EditEventTypeRequest struct {
-	ID int `pb:"1"`
-}
-
-type EditEventTypeResponse struct {
-	EventTypes EventTypes `pb:"1"`
-}
-
-type UpdateEventTypeRequest struct {
-	ID        int    `pb:"1"`
-	EventName string `pb:"2"`
-}
-
-type UpdateEventTypeResponse struct {
-	EventTypes EventTypes `pb:"1"`
-}
-
-type DeleteEventTypeRequest struct {
-	ID int `pb:"1"`
-}
-
-type DeleteEventTypeResponse struct{}
-
-type EventTypeListRequest struct {
-	SearchTerm string `pb:"1"`
-}
-
-type EventTypeListResponse struct {
-	EventTypeFilterList EventTypeFilterList `pb:"1"`
+type CreateEventResponse struct {
+	Event Event `pb:"1"`
 }
