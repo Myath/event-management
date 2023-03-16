@@ -8,6 +8,8 @@ type EventService interface {
 	CreateEventType(CreateEventTypeRequest) CreateEventTypeResponse
 	EditEventType(EditEventTypeRequest) EditEventTypeResponse
 	UpdateEventType(UpdateEventTypeRequest) UpdateEventTypeResponse
+	DeleteEventType(DeleteEventTypeRequest) DeleteEventTypeResponse
+	EventTypeList(EventTypeListRequest) EventTypeListResponse
 }
 
 type EventTypes struct {
@@ -16,6 +18,11 @@ type EventTypes struct {
 	CreatedAt time.Time `pb:"3"`
 	UpdatedAt time.Time `pb:"4"`
 	DeletedAt time.Time `pb:"5"`
+}
+
+type EventTypeFilterList struct {
+	AllEventType []EventTypes `pb:"1"`
+	SearchTerm   string       `pb:"2"`
 }
 
 type CreateEventTypeRequest struct {
@@ -35,10 +42,24 @@ type EditEventTypeResponse struct {
 }
 
 type UpdateEventTypeRequest struct {
-	ID        int       `pb:"1"`
-	EventName string    `pb:"2"`
+	ID        int    `pb:"1"`
+	EventName string `pb:"2"`
 }
 
 type UpdateEventTypeResponse struct {
 	EventTypes EventTypes `pb:"1"`
+}
+
+type DeleteEventTypeRequest struct {
+	ID int `pb:"1"`
+}
+
+type DeleteEventTypeResponse struct{}
+
+type EventTypeListRequest struct {
+	SearchTerm string `pb:"1"`
+}
+
+type EventTypeListResponse struct {
+	EventTypeFilterList EventTypeFilterList `pb:"1"`
 }

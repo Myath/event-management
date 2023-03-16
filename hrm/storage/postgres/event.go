@@ -68,3 +68,37 @@ const updateEventTypeQuery = `UPDATE event_types
 	
 		return &s, nil
 	}
+
+	const deleteEventTypeByIDQuery = `UPDATE event_types SET deleted_at = CURRENT_TIMESTAMP WHERE id=$1 AND deleted_at IS NULL`
+
+func (p PostgresStorage) DeleteEventTypeByID(id int) error {
+	res, err := p.DB.Exec(deleteEventTypeByIDQuery, id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	rowCount, err := res.RowsAffected()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	if rowCount <= 0 {
+		return fmt.Errorf("unable to delete user")
+	}
+
+	return nil
+}
+
+const listEventTypeQuery = `SELECT * FROM event_types WHERE deleted_at IS NULL AND (event_name ILIKE '%%' || $1 || '%%')`
+
+func (p PostgresStorage) EventTypeList(uf storage.EventTypesFilter) ([]storage.EventTypes, error) {
+
+	var eventType []storage.EventTypes
+	if err := p.DB.Select(&eventType, listEventTypeQuery, uf.SearchTerm); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return eventType, nil
+}
