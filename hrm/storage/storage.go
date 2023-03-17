@@ -91,12 +91,11 @@ type Event struct {
 	Location    string       `json:"location" db:"location"`
 	StartAt     time.Time    `json:"start_at" db:"start_at"`
 	EndAt       time.Time    `json:"end_at" db:"end_at"`
-	PublishedAt time.Time    `json:"published_at" db:"published_at"`
+	PublishedAt sql.NullTime `json:"published_at" db:"published_at"`
 	CreatedAt   time.Time    `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time    `json:"updated_at" db:"updated_at"`
 	DeletedAt   sql.NullTime `json:"deleted_at" db:"deleted_at"`
 }
-
 
 func (e Event) Validate() error {
 	return validation.ValidateStruct(&e,
@@ -120,4 +119,3 @@ func (e Event) Validate() error {
 		),
 	)
 }
-

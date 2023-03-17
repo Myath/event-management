@@ -6,6 +6,8 @@ import (
 
 type EventService interface {
 	CreateEvent(CreateEventRequest) CreateEventResponse
+	EditEvent(EditEventRequest) EditEventResponse
+	UpdateEvent(UpdateEventRequest) UpdateEventResponse
 }
 
 type Event struct {
@@ -17,9 +19,6 @@ type Event struct {
 	StartAt     time.Time `pb:"6"`
 	EndAt       time.Time `pb:"7"`
 	PublishedAt time.Time `pb:"8"`
-	CreatedAt   time.Time `pb:"9"`
-	UpdatedAt   time.Time `pb:"10"`
-	DeletedAt   time.Time `pb:"11"`
 }
 
 type CreateEventRequest struct {
@@ -33,5 +32,21 @@ type CreateEventRequest struct {
 }
 
 type CreateEventResponse struct {
+	Event Event `pb:"1"`
+}
+
+type EditEventRequest struct {
+	ID int `pb:"1"`
+}
+
+type EditEventResponse struct {
+	Event Event `pb:"1"`
+}
+
+type UpdateEventRequest struct {
+	Event Event `pb:"1"`
+}
+
+type UpdateEventResponse struct {
 	Event Event `pb:"1"`
 }
