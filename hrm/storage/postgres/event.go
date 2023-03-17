@@ -6,18 +6,30 @@ import (
 	"log"
 )
 
-const insertEventTypeQuery = `
-INSERT INTO event_types(
-	event_name
+
+const insertEventQuery = `
+INSERT INTO events(
+	event_type_id,
+	event_name,
+	description,
+	location,
+	start_at,
+	end_at,
+	published_at
     )
 VALUES(
-	:event_name
+	:event_type_id,
+	:event_name,
+	:description,
+	:location,
+	:start_at,
+	:end_at,
+	:published_at
     )RETURNING *;
 `
 
-func (p PostgresStorage) CreateEventType(s storage.EventTypes) (*storage.EventTypes, error){
-
-	stmt, err := p.DB.PrepareNamed(insertEventTypeQuery)
+func (p PostgresStorage) InsertEvent(s storage.Event) (*storage.Event, error){
+	stmt, err := p.DB.PrepareNamed(insertEventQuery)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -27,17 +39,17 @@ func (p PostgresStorage) CreateEventType(s storage.EventTypes) (*storage.EventTy
 	}
 
 	if s.ID == 0 {
-		return nil, fmt.Errorf("unable to insert eventType into db")
+		return nil, fmt.Errorf("unable to insert event into db")
 	}
 
 	return &s, nil
 }
 
-const getEventTypeByIDQuery = `SELECT * FROM event_types WHERE id=$1 AND deleted_at IS NULL`
+const getEventByIDQuery = `SELECT * FROM events WHERE id=$1 AND deleted_at IS NULL`
 
-func (p PostgresStorage) GetEventTypeByID(id int) (*storage.EventTypes, error) {
-	var s storage.EventTypes
-	if err := p.DB.Get(&s, getEventTypeByIDQuery, id); err != nil {
+func (p PostgresStorage) GetEventByID(id int) (*storage.Event, error) {
+	var s storage.Event
+	if err := p.DB.Get(&s, getEventByIDQuery, id); err != nil {
 		log.Println(err)
 		return nil, err
 	}
@@ -45,60 +57,32 @@ func (p PostgresStorage) GetEventTypeByID(id int) (*storage.EventTypes, error) {
 	return &s, nil
 }
 
-const updateEventTypeQuery = `UPDATE event_types
-        SET	event_name = COALESCE(NULLIF(:event_name, ''), event_name),
+const updateEventQuery = `UPDATE events
+        SET	event_type_id = :event_type_id,
+		event_name = COALESCE(NULLIF(:event_name, ''), event_name),
+		description = COALESCE(NULLIF(:description, ''), description),
+		location = COALESCE(NULLIF(:location, ''), location),
+		start_at = :start_at,
+		end_at = :end_at,
+		published_at = :published_at,
 		updated_at = CURRENT_TIMESTAMP
 		WHERE id = :id
 		RETURNING *;
 	`
 
-	func (p PostgresStorage) UpdateEventType(s storage.EventTypes) (*storage.EventTypes, error) {
-		stmt, err := p.DB.PrepareNamed(updateEventTypeQuery)
-		if err != nil {
-			log.Fatalln(err)
-		}
-	
-		if err := stmt.Get(&s, s); err != nil {
-			return nil, err
-		}
-	
-		if s.ID == 0 {
-			return nil, fmt.Errorf("unable to insert eventType into db")
-		}
-	
-		return &s, nil
-	}
-
-	const deleteEventTypeByIDQuery = `UPDATE event_types SET deleted_at = CURRENT_TIMESTAMP WHERE id=$1 AND deleted_at IS NULL`
-
-func (p PostgresStorage) DeleteEventTypeByID(id int) error {
-	res, err := p.DB.Exec(deleteEventTypeByIDQuery, id)
+func (p PostgresStorage) UpdateEvent(s storage.Event) (*storage.Event, error) {
+	stmt, err := p.DB.PrepareNamed(updateEventQuery)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		log.Fatalln(err)
 	}
 
-	rowCount, err := res.RowsAffected()
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	if rowCount <= 0 {
-		return fmt.Errorf("unable to delete user")
-	}
-
-	return nil
-}
-
-const listEventTypeQuery = `SELECT * FROM event_types WHERE deleted_at IS NULL AND (event_name ILIKE '%%' || $1 || '%%')`
-
-func (p PostgresStorage) EventTypeList(uf storage.EventTypesFilter) ([]storage.EventTypes, error) {
-
-	var eventType []storage.EventTypes
-	if err := p.DB.Select(&eventType, listEventTypeQuery, uf.SearchTerm); err != nil {
-		log.Println(err)
+	if err := stmt.Get(&s, s); err != nil {
 		return nil, err
 	}
-	return eventType, nil
+
+	if s.ID == 0 {
+		return nil, fmt.Errorf("unable to update event into db")
+	}
+
+	return &s, nil
 }
