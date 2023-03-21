@@ -10,12 +10,18 @@ import (
 	eventpb "event-management/gunk/v1/event"
 	eventTypepb "event-management/gunk/v1/eventType"
 	userpb "event-management/gunk/v1/user"
+	commentpb "event-management/gunk/v1/comment"
+	usereventpb "event-management/gunk/v1/userEvent"
 	et "event-management/hrm/core/eventType"
 	ev "event-management/hrm/core/event"
 	cu "event-management/hrm/core/user"
+	cc "event-management/hrm/core/comment"
+	ue "event-management/hrm/core/userEvent"
 	"event-management/hrm/sevice/eventType"
 	"event-management/hrm/sevice/event"
 	"event-management/hrm/sevice/user"
+	"event-management/hrm/sevice/comment"
+	"event-management/hrm/sevice/userEvent"
 	"event-management/hrm/storage/postgres"
 
 	_ "github.com/lib/pq"
@@ -74,6 +80,14 @@ func main() {
 	eventCore := ev.NewCoreEvent(postgreStorage)
 	eventSvc := event.NewEventSvc(eventCore)
 	eventpb.RegisterEventServiceServer(grpcServer,eventSvc)
+
+	commentCore := cc.NewCoreComment(postgreStorage)
+	commentSvc := comment.NewCommentSvc(commentCore)
+	commentpb.RegisterCommentServiceServer(grpcServer, commentSvc)
+
+	userEventCore := ue.NewCoreUserEvent(postgreStorage)
+	userEventSvc := userevent.NewUserEventSvc(userEventCore)
+	usereventpb.RegisterUserEventServiceServer(grpcServer, userEventSvc)
 
 	// start reflection server
 	reflection.Register(grpcServer)

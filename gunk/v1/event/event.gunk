@@ -8,6 +8,10 @@ type EventService interface {
 	CreateEvent(CreateEventRequest) CreateEventResponse
 	EditEvent(EditEventRequest) EditEventResponse
 	UpdateEvent(UpdateEventRequest) UpdateEventResponse
+	DeleteEvent(DeleteEventRequest) DeleteEventResponse
+	EventList(EventListRequest) EventListResponse
+	PublishedDateForm(PublishedDateFormRequest) PublishedDateFormResponse
+	PublishedEvent(PublishedEventRequest) PublishedEventResponse
 }
 
 type Event struct {
@@ -19,6 +23,23 @@ type Event struct {
 	StartAt     time.Time `pb:"6"`
 	EndAt       time.Time `pb:"7"`
 	PublishedAt time.Time `pb:"8"`
+}
+
+type EventList struct {
+	ID            int       `pb:"1"`
+	EventTypeId   int       `pb:"2"`
+	EventTypeName string    `pb:"3"`
+	EventName     string    `pb:"4"`
+	Description   string    `pb:"5"`
+	Location      string    `pb:"6"`
+	StartAt       time.Time `pb:"7"`
+	EndAt         time.Time `pb:"8"`
+	PublishedAt   time.Time `pb:"9"`
+}
+
+type EventFilterList struct {
+	AllEvent   []EventList `pb:"1"`
+	SearchTerm string      `pb:"2"`
 }
 
 type CreateEventRequest struct {
@@ -49,4 +70,37 @@ type UpdateEventRequest struct {
 
 type UpdateEventResponse struct {
 	Event Event `pb:"1"`
+}
+
+type DeleteEventRequest struct {
+	ID int `pb:"1"`
+}
+
+type DeleteEventResponse struct{}
+
+type EventListRequest struct {
+	SearchTerm string `pb:"1"`
+}
+
+type EventListResponse struct {
+	EventFilterList EventFilterList `pb:"1"`
+}
+
+type PublishedDateFormRequest struct {
+	ID int `pb:"1"`
+}
+
+type PublishedDateFormResponse struct {
+	ID          int       `pb:"1"`
+	PublishedAt time.Time `pb:"2"`
+}
+
+type PublishedEventRequest struct {
+	ID          int       `pb:"1"`
+	PublishedAt time.Time `pb:"2"`
+}
+
+type PublishedEventResponse struct {
+	ID          int       `pb:"1"`
+	PublishedAt time.Time `pb:"2"`
 }

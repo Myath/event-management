@@ -1,0 +1,68 @@
+package commentpb
+
+import (
+	"time"
+)
+
+type CommentService interface {
+	CreateComment(CreateCommentRequest) CreateCommentResponse
+	EditComment(EditCommentRequest) EditCommentResponse
+	UpdateComment(UpdateCommentRequest) UpdateCommentResponse
+	CommentListOfEVents(CommentListOfEVentsRequest) CommentListOfEVentsResponse
+}
+
+type Comments struct {
+	ID      int    `pb:"1"`
+	UserId  int    `pb:"2"`
+	EventID int    `pb:"3"`
+	Comment string `pb:"4"`
+}
+
+type CommentList struct {
+	ID            int       `pb:"1"`
+	UserId        int       `pb:"2"`
+	Username      string    `pb:"3"`
+	EventID       int       `pb:"4"`
+	EventTypeName string    `pb:"5"`
+	EventName     string    `pb:"6"`
+	Description   string    `pb:"7"`
+	Location      string    `pb:"8"`
+	StartAt       time.Time `pb:"9"`
+	EndAt         time.Time `pb:"10"`
+	PublishedAt   time.Time `pb:"11"`
+	Comment       string    `pb:"12"`
+}
+
+type CreateCommentRequest struct {
+	UserId  int    `pb:"1"`
+	EventID int    `pb:"2"`
+	Comment string `pb:"3"`
+}
+
+type CreateCommentResponse struct {
+	Comments Comments `pb:"1"`
+}
+
+type EditCommentRequest struct {
+	ID int `pb:"1"`
+}
+
+type EditCommentResponse struct {
+	Comments Comments `pb:"1"`
+}
+
+type UpdateCommentRequest struct {
+	Comments Comments `pb:"1"`
+}
+
+type UpdateCommentResponse struct {
+	Comments Comments `pb:"1"`
+}
+
+type CommentListOfEVentsRequest struct {
+	EventID int `pb:"1"`
+}
+
+type CommentListOfEVentsResponse struct {
+	CmtOfEv []CommentList `pb:"1"`
+}
