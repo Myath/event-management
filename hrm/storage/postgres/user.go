@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"database/sql"
 	"event-management/hrm/storage"
 	"fmt"
 	"log"
@@ -12,14 +13,16 @@ const registerQuery = `
 		last_name,
 		username,
 		email,
-		password
+		password,
+		is_admin
 		)  
 	VALUES(
 		:first_name,
 		:last_name,
 		:username,
 		:email,
-		:password
+		:password,
+		:is_admin
 		)RETURNING *;
 	`
 
@@ -45,7 +48,7 @@ const getUserByUsernameQuery = `SELECT * FROM users WHERE username=$1 AND delete
 
 func (ps PostgresStorage) GetUserByUsername(username string) (*storage.User, error) {
 	var user storage.User
-	if err := ps.DB.Get(&user, getUserByUsernameQuery, username); err != nil {
+	if err := ps.DB.Get(&user, getUserByUsernameQuery, username); err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 
@@ -74,7 +77,7 @@ const updateUserQuery = `UPDATE users
 		username = COALESCE(NULLIF(:username, ''), username),
 		email = COALESCE(NULLIF(:email, ''), email),
 		password = COALESCE(NULLIF(:password, ''), password),
-		is_active = :is_active,
+		is_active = COALESCE(NULLIF(:is_active, false), is_active),
 		updated_at = CURRENT_TIMESTAMP
 		WHERE id = :id
 		RETURNING *;
@@ -119,7 +122,7 @@ func (p PostgresStorage) DeleteUserByID(id int) error {
 	return nil
 }
 
-const UserListQuery = `SELECT * FROM users WHERE deleted_at IS NULL AND (username ILIKE '%%' || $1 || '%%' or first_name ILIKE '%%' || $1 || '%%' or last_name ILIKE '%%' || $1 || '%%' or email ILIKE '%%' || $1 || '%%')`
+const UserListQuery = `SELECT * FROM users WHERE deleted_at IS NULL AND is_admin = false AND (username ILIKE '%%' || $1 || '%%' or first_name ILIKE '%%' || $1 || '%%' or last_name ILIKE '%%' || $1 || '%%' or email ILIKE '%%' || $1 || '%%')`
 
 func (p PostgresStorage) UserList(uf storage.UserFilter) ([]storage.User, error) {
 

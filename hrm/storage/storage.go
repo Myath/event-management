@@ -12,8 +12,8 @@ type User struct {
 	ID        int          `json:"id" form:"-" db:"id"`
 	FirstName string       `json:"first_name" db:"first_name"`
 	LastName  string       `json:"last_name" db:"last_name"`
-	Email     string       `json:"email" db:"email"`
 	Username  string       `json:"username" db:"username"`
+	Email     string       `json:"email" db:"email"`
 	Password  string       `json:"password" db:"password"`
 	IsAdmin   bool         `json:"is_admin" db:"is_admin"`
 	IsActive  bool         `json:"is_active" db:"is_active"`
@@ -84,17 +84,21 @@ func (e EventTypes) Validate() error {
 }
 
 type Event struct {
-	ID          int          `json:"id" form:"-" db:"id"`
-	EventTypeId int          `json:"event_type_id" db:"event_type_id"`
-	EventName   string       `json:"event_name" db:"event_name"`
-	Description string       `json:"description" db:"description"`
-	Location    string       `json:"location" db:"location"`
-	StartAt     time.Time    `json:"start_at" db:"start_at"`
-	EndAt       time.Time    `json:"end_at" db:"end_at"`
-	PublishedAt sql.NullTime `json:"published_at" db:"published_at"`
-	CreatedAt   time.Time    `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at" db:"updated_at"`
-	DeletedAt   sql.NullTime `json:"deleted_at" db:"deleted_at"`
+	ID            int          `json:"id" form:"-" db:"id"`
+	EventTypeId   int          `json:"event_type_id" db:"event_type_id"`
+	EventTypeName string       `json:"event_type_name" db:"event_type_name"`
+	EventName     string       `json:"event_name" db:"event_name"`
+	Description   string       `json:"description" db:"description"`
+	Location      string       `json:"location" db:"location"`
+	StartAt       time.Time    `json:"start_at" db:"start_at"`
+	EndAt         time.Time    `json:"end_at" db:"end_at"`
+	PublishedAt   sql.NullTime `json:"published_at" db:"published_at"`
+	CreatedAt     time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at" db:"updated_at"`
+	DeletedAt     sql.NullTime `json:"deleted_at" db:"deleted_at"`
+}
+type EventFilter struct {
+	SearchTerm string
 }
 
 func (e Event) Validate() error {
@@ -116,6 +120,58 @@ func (e Event) Validate() error {
 		),
 		validation.Field(&e.EndAt,
 			validation.Required.When(e.ID == 0).Error("The end time field is required."),
+		),
+	)
+}
+
+type Comments struct {
+	ID            int          `json:"id" form:"-" db:"id"`
+	UserId        int          `json:"user_id" db:"user_id"`
+	Username      string       `json:"username" db:"username"`
+	IsAdmin       bool         `json:"is_admin" db:"is_admin"`
+	EventID       int          `json:"event_id" db:"event_id"`
+	EventName     string       `json:"event_name" db:"event_name"`
+	EventTypeId   int          `json:"event_type_id" db:"event_type_id"`
+	EventTypeName string       `json:"event_type_name" db:"event_type_name"`
+	Description   string       `json:"description" db:"description"`
+	Location      string       `json:"location" db:"location"`
+	StartAt       time.Time    `json:"start_at" db:"start_at"`
+	EndAt         time.Time    `json:"end_at" db:"end_at"`
+	PublishedAt   sql.NullTime `json:"published_at" db:"published_at"`
+	Comment       string       `json:"comment" db:"comment"`
+	CreatedAt     time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at" db:"updated_at"`
+}
+
+func (c Comments) Validate() error {
+	return validation.ValidateStruct(&c,
+		validation.Field(&c.UserId,
+			validation.Required.Error("The userId is required."),
+		),
+		validation.Field(&c.EventID,
+			validation.Required.Error("The eventID name field is required."),
+		),
+		validation.Field(&c.Comment,
+			validation.Required.When(c.ID == 0).Error("The Comment field is required."),
+		),
+	)
+}
+
+type UserEvent struct {
+	UserId    int       `json:"user_id" db:"user_id"`
+	EventID   int       `json:"event_id" db:"event_id"`
+	Status    int       `json:"status" db:"status"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+func (u UserEvent) Validate() error {
+	return validation.ValidateStruct(&u,
+		validation.Field(&u.UserId,
+			validation.Required.Error("The userId is required."),
+		),
+		validation.Field(&u.EventID,
+			validation.Required.Error("The eventID name field is required."),
 		),
 	)
 }

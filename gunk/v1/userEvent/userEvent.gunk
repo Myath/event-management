@@ -1,0 +1,57 @@
+package usereventpb
+
+import (
+	"time"
+
+)
+
+type UserEventService interface{
+	CreateUserEvent(CreateUserEventRequest) CreateUserEventResponse
+	IsEventAvailable(IsEventAvailableRequest) IsEventAvailableResponse
+	UpdateUserEvent(UpdateUserEventRequest) UpdateUserEventResponse
+}
+
+type Status int32
+
+const (
+    Going Status = iota
+    MaybeGoing
+    Interested
+)
+
+
+type UserEvent struct {
+	UserId    int       `pb:"1"`
+	EventID   int       `pb:"2"`
+	Status    Status       `pb:"3"`
+	CreatedAt time.Time `pb:"4"`
+	UpdatedAt time.Time `pb:"5"`
+}
+
+type CreateUserEventRequest struct {
+    UserId    int       `pb:"1"`
+	EventID   int       `pb:"2"`
+	Status    Status       `pb:"3"`
+}
+
+type CreateUserEventResponse struct {
+    UserEvent UserEvent `pb:"1"`
+}
+
+type IsEventAvailableRequest struct {
+	UserId    int       `pb:"1"`
+	EventID   int       `pb:"2"`
+}
+
+type IsEventAvailableResponse struct {
+    UserEvent UserEvent `pb:"1"`
+}
+
+type UpdateUserEventRequest struct {
+	UserEvent UserEvent `pb:"1"`
+}
+
+type UpdateUserEventResponse struct {
+	UserEvent UserEvent `pb:"1"`
+}
+

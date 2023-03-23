@@ -15,7 +15,7 @@ VALUES(
     )RETURNING *;
 `
 
-func (p PostgresStorage) CreateEventType(s storage.EventTypes) (*storage.EventTypes, error){
+func (p PostgresStorage) CreateEventType(s storage.EventTypes) (*storage.EventTypes, error) {
 
 	stmt, err := p.DB.PrepareNamed(insertEventTypeQuery)
 	if err != nil {
@@ -52,24 +52,24 @@ const updateEventTypeQuery = `UPDATE event_types
 		RETURNING *;
 	`
 
-	func (p PostgresStorage) UpdateEventType(s storage.EventTypes) (*storage.EventTypes, error) {
-		stmt, err := p.DB.PrepareNamed(updateEventTypeQuery)
-		if err != nil {
-			log.Fatalln(err)
-		}
-	
-		if err := stmt.Get(&s, s); err != nil {
-			return nil, err
-		}
-	
-		if s.ID == 0 {
-			return nil, fmt.Errorf("unable to insert eventType into db")
-		}
-	
-		return &s, nil
+func (p PostgresStorage) UpdateEventType(s storage.EventTypes) (*storage.EventTypes, error) {
+	stmt, err := p.DB.PrepareNamed(updateEventTypeQuery)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	const deleteEventTypeByIDQuery = `UPDATE event_types SET deleted_at = CURRENT_TIMESTAMP WHERE id=$1 AND deleted_at IS NULL`
+	if err := stmt.Get(&s, s); err != nil {
+		return nil, err
+	}
+
+	if s.ID == 0 {
+		return nil, fmt.Errorf("unable to insert eventType into db")
+	}
+
+	return &s, nil
+}
+
+const deleteEventTypeByIDQuery = `UPDATE event_types SET deleted_at = CURRENT_TIMESTAMP WHERE id=$1 AND deleted_at IS NULL`
 
 func (p PostgresStorage) DeleteEventTypeByID(id int) error {
 	res, err := p.DB.Exec(deleteEventTypeByIDQuery, id)
