@@ -47,9 +47,7 @@ func (p PostgresStorage) GetUserEventByIDQuery(userId, eventId int) (*storage.Us
 
 
 const updateUserEventQuery = `UPDATE user_events
-        SET	user_id = :user_id,
-		event_id = :event_id,
-		status = :status,
+        SET	status = :status,
 		updated_at = CURRENT_TIMESTAMP
 		WHERE user_id= :user_id AND event_id = :event_id
 		RETURNING *;

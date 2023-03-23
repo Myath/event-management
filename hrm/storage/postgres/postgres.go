@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
@@ -43,12 +44,12 @@ func ConnectDatabase(cfg *viper.Viper) (*sqlx.DB, error) {
 	return db, nil
 }
 
-// func NewTestStorage(dbstring string, migrationDir string) (*PostgresStorage, func()) {
-// 	db, teardown := MustNewDevelopmentDB(dbstring, migrationDir)
-// 	db.SetMaxOpenConns(5)
-// 	db.SetConnMaxLifetime(time.Hour)
+func NewTestStorage(dbstring string, migrationDir string) (*PostgresStorage, func()) {
+	db, teardown := MustNewDevelopmentDB(dbstring, migrationDir)
+	db.SetMaxOpenConns(5)
+	db.SetConnMaxLifetime(time.Hour)
 
-// 	return &PostgresStorage{
-// 		DB: db,
-// 	}, teardown
-// }
+	return &PostgresStorage{
+		DB: db,
+	}, teardown
+}

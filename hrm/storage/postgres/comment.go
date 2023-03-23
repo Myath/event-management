@@ -50,9 +50,7 @@ func (p PostgresStorage) GetCommentID(id int) (*storage.Comments, error) {
 
 
 const updateCommentQuery = `UPDATE comments
-        SET	user_id = :user_id,
-		event_id = :event_id,
-		comment = COALESCE(NULLIF(:comment, ''), comment),
+        SET	comment = COALESCE(NULLIF(:comment, ''), comment),
 		updated_at = CURRENT_TIMESTAMP
 		WHERE id = :id
 		RETURNING *;

@@ -12,8 +12,8 @@ type User struct {
 	ID        int          `json:"id" form:"-" db:"id"`
 	FirstName string       `json:"first_name" db:"first_name"`
 	LastName  string       `json:"last_name" db:"last_name"`
-	Email     string       `json:"email" db:"email"`
 	Username  string       `json:"username" db:"username"`
+	Email     string       `json:"email" db:"email"`
 	Password  string       `json:"password" db:"password"`
 	IsAdmin   bool         `json:"is_admin" db:"is_admin"`
 	IsActive  bool         `json:"is_active" db:"is_active"`

@@ -75,10 +75,8 @@ func (cs CommentSvc) EditComment(ctx context.Context, r *commentpb.EditCommentRe
 
 func (cs CommentSvc) UpdateComment(xtc context.Context, r *commentpb.UpdateCommentRequest) (*commentpb.UpdateCommentResponse, error) {
 	comment := storage.Comments{
-		ID:      int(r.Comments.ID),
-		UserId:  int(r.Comments.GetUserId()),
-		EventID: int(r.Comments.GetEventID()),
-		Comment: r.Comments.GetComment(),
+		ID:      int(r.ID),
+		Comment: r.GetComment(),
 	}
 
 	if err := comment.Validate(); err != nil {

@@ -52,7 +52,8 @@ type EditCommentResponse struct {
 }
 
 type UpdateCommentRequest struct {
-	Comments Comments `pb:"1"`
+	ID      int    `pb:"1"`
+	Comment string `pb:"2"`
 }
 
 type UpdateCommentResponse struct {

@@ -33,6 +33,7 @@ func (us UserSvc) Register(ctx context.Context, r *userpb.RegisterRequest) (*use
 		Username:  r.GetUsername(),
 		Email:     r.GetEmail(),
 		Password:  r.GetPassword(),
+		IsAdmin: r.GetIsAdmin(),
 	}
 
 	if err := user.Validate(); err != nil {

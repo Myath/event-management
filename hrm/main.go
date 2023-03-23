@@ -53,7 +53,7 @@ func main() {
 		log.Fatalf("unable to listen port: %v", err)
 	}
 
-	postgreStorage, err := postgres.NewPostgresStorage(config)
+	postgresStorage, err := postgres.NewPostgresStorage(config)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -63,29 +63,29 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if err := goose.Up(postgreStorage.DB.DB, "migrations"); err != nil {
+	if err := goose.Up(postgresStorage.DB.DB, "migrations"); err != nil {
 		log.Fatalln(err)
 	}
 
 	grpcServer := grpc.NewServer()
 
-	userCore := cu.NewCoreUser(postgreStorage)
+	userCore := cu.NewCoreUser(postgresStorage)
 	userSvc := user.NewUserSvc(userCore)
 	userpb.RegisterUserServiceServer(grpcServer, userSvc)
 
-	eventTypeCore := et.NewCoreEventType(postgreStorage)
+	eventTypeCore := et.NewCoreEventType(postgresStorage)
 	eventTypeSvc := eventType.NewEventTypeSvc(eventTypeCore)
 	eventTypepb.RegisterEventTypeServiceServer(grpcServer,eventTypeSvc)
 
-	eventCore := ev.NewCoreEvent(postgreStorage)
+	eventCore := ev.NewCoreEvent(postgresStorage)
 	eventSvc := event.NewEventSvc(eventCore)
 	eventpb.RegisterEventServiceServer(grpcServer,eventSvc)
 
-	commentCore := cc.NewCoreComment(postgreStorage)
+	commentCore := cc.NewCoreComment(postgresStorage)
 	commentSvc := comment.NewCommentSvc(commentCore)
 	commentpb.RegisterCommentServiceServer(grpcServer, commentSvc)
 
-	userEventCore := ue.NewCoreUserEvent(postgreStorage)
+	userEventCore := ue.NewCoreUserEvent(postgresStorage)
 	userEventSvc := userevent.NewUserEventSvc(userEventCore)
 	usereventpb.RegisterUserEventServiceServer(grpcServer, userEventSvc)
 
