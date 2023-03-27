@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-func TestPostgresStorage_InsertUserEvent(t *testing.T) {
+func TestInsertUserEvent(t *testing.T) {
 	s, tr := NewTestStorage(getDBConnectionString(), getMigrationDir())
 	t.Parallel()
 	t.Cleanup(func() {

@@ -12,6 +12,7 @@ type EventService interface {
 	EventList(EventListRequest) EventListResponse
 	PublishedDateForm(PublishedDateFormRequest) PublishedDateFormResponse
 	PublishedEvent(PublishedEventRequest) PublishedEventResponse
+	EventListUnderEvent(EventListUnderEventRequest) EventListUnderEventResponse
 }
 
 type Event struct {
@@ -104,3 +105,14 @@ type PublishedEventResponse struct {
 	ID          int       `pb:"1"`
 	PublishedAt time.Time `pb:"2"`
 }
+
+type EventListUnderEventRequest struct {
+	SearchTerm string `pb:"1"`
+	EventTypeId int `pb:"2"`
+}
+
+type EventListUnderEventResponse struct {
+	EvUnEvType EventFilterList `pb:"1"`
+}
+
+
