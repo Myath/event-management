@@ -4,6 +4,7 @@ import (
 	"context"
 	eventTypepb "event-management/gunk/v1/eventType"
 	"event-management/hrm/storage"
+	"sort"
 )
 
 type EventTypeCore interface {
@@ -110,6 +111,10 @@ func (es EventTypeSvc) EventTypeList(ctx context.Context, r *eventTypepb.EventTy
 	if err != nil {
 		return nil, err
 	}
+
+	sort.SliceStable(et, func(i, j int) bool {
+		return et[i].ID > et[j].ID
+	})
 
 	var allEventType []*eventTypepb.EventTypes
 	for _, ae := range et {

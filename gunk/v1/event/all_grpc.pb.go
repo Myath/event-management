@@ -25,6 +25,7 @@ type EventServiceClient interface {
 	EventList(ctx context.Context, in *EventListRequest, opts ...grpc.CallOption) (*EventListResponse, error)
 	PublishedDateForm(ctx context.Context, in *PublishedDateFormRequest, opts ...grpc.CallOption) (*PublishedDateFormResponse, error)
 	PublishedEvent(ctx context.Context, in *PublishedEventRequest, opts ...grpc.CallOption) (*PublishedEventResponse, error)
+	EventListUnderEvent(ctx context.Context, in *EventListUnderEventRequest, opts ...grpc.CallOption) (*EventListUnderEventResponse, error)
 }
 
 type eventServiceClient struct {
@@ -98,6 +99,15 @@ func (c *eventServiceClient) PublishedEvent(ctx context.Context, in *PublishedEv
 	return out, nil
 }
 
+func (c *eventServiceClient) EventListUnderEvent(ctx context.Context, in *EventListUnderEventRequest, opts ...grpc.CallOption) (*EventListUnderEventResponse, error) {
+	out := new(EventListUnderEventResponse)
+	err := c.cc.Invoke(ctx, "/eventpb.EventService/EventListUnderEvent", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventServiceServer is the server API for EventService service.
 // All implementations must embed UnimplementedEventServiceServer
 // for forward compatibility
@@ -109,6 +119,7 @@ type EventServiceServer interface {
 	EventList(context.Context, *EventListRequest) (*EventListResponse, error)
 	PublishedDateForm(context.Context, *PublishedDateFormRequest) (*PublishedDateFormResponse, error)
 	PublishedEvent(context.Context, *PublishedEventRequest) (*PublishedEventResponse, error)
+	EventListUnderEvent(context.Context, *EventListUnderEventRequest) (*EventListUnderEventResponse, error)
 	mustEmbedUnimplementedEventServiceServer()
 }
 
@@ -136,6 +147,9 @@ func (UnimplementedEventServiceServer) PublishedDateForm(context.Context, *Publi
 }
 func (UnimplementedEventServiceServer) PublishedEvent(context.Context, *PublishedEventRequest) (*PublishedEventResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishedEvent not implemented")
+}
+func (UnimplementedEventServiceServer) EventListUnderEvent(context.Context, *EventListUnderEventRequest) (*EventListUnderEventResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EventListUnderEvent not implemented")
 }
 func (UnimplementedEventServiceServer) mustEmbedUnimplementedEventServiceServer() {}
 
@@ -276,6 +290,24 @@ func _EventService_PublishedEvent_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EventService_EventListUnderEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EventListUnderEventRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).EventListUnderEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/eventpb.EventService/EventListUnderEvent",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).EventListUnderEvent(ctx, req.(*EventListUnderEventRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventService_ServiceDesc is the grpc.ServiceDesc for EventService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -310,6 +342,10 @@ var EventService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PublishedEvent",
 			Handler:    _EventService_PublishedEvent_Handler,
+		},
+		{
+			MethodName: "EventListUnderEvent",
+			Handler:    _EventService_EventListUnderEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

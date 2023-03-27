@@ -14,6 +14,7 @@ type EventStore interface {
 	ListEvent(uf storage.EventFilter) ([]storage.Event, error)
 	GetPublishedDateByID(id int) (*storage.Event, error)
 	PublishedEvent(s storage.Event) (*storage.Event, error)
+	ListEventsUnderEventType(uf storage.EventFilter, eventTypeID int) ([]storage.Event, error)
 }
 
 type CoreEvent struct {
@@ -103,3 +104,14 @@ func (ce CoreEvent) PublishedEvent(s storage.Event) (*storage.Event, error){
 
 	return eventPublished, nil
 }
+
+func (ce CoreEvent) ListEventsUnderEventTypeWithFilter(s storage.EventFilter, se storage.Event) ([]storage.Event, error){
+	uf := storage.EventFilter{
+		SearchTerm: s.SearchTerm,
+	}
+	eventListUnderEvent, err := ce.store.ListEventsUnderEventType(uf, se.EventTypeId)
+	if err != nil {
+		return nil, err
+	}
+	return eventListUnderEvent, nil
+ }

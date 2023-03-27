@@ -159,5 +159,24 @@ func (p PostgresStorage) PublishedEvent(s storage.Event) (*storage.Event, error)
 		return nil, fmt.Errorf("unable to update event into db")
 	}
 
+
 	return &s, nil
+}
+
+
+const listEventsUnderEventTypeQuery = `SELECT events.id, events.event_type_id, event_types.event_type_name, event_name, description, location, start_at, end_at, published_at
+FROM events
+INNER JOIN event_types ON events.event_type_id = event_types.id
+WHERE events.deleted_at IS NULL AND event_types.deleted_at IS NULL AND events.event_type_id = $1 AND (event_type_name ILIKE '%%' || $2 || '%%' or event_name ILIKE '%%' || $2 || '%%' or description ILIKE '%%' || $2 || '%%' or location ILIKE '%%' || $2 || '%%')
+ORDER BY events.created_at DESC
+;`
+
+func (p PostgresStorage) ListEventsUnderEventType(uf storage.EventFilter, eventTypeID int) ([]storage.Event, error) {
+
+	var event []storage.Event
+	if err := p.DB.Select(&event, listEventsUnderEventTypeQuery, eventTypeID, uf.SearchTerm); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return event, nil
 }

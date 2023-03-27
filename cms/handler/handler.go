@@ -5,9 +5,12 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"text/template"
 
+	eventpb "event-management/gunk/v1/event"
+	eventTypepb "event-management/gunk/v1/eventType"
 	userpb "event-management/gunk/v1/user"
 
 	"github.com/Masterminds/sprig"
@@ -21,6 +24,8 @@ import (
 
 type hrmService struct {
 	userpb.UserServiceClient
+	eventpb.EventServiceClient
+	eventTypepb.EventTypeServiceClient
 }
 
 type Handler struct {
@@ -33,6 +38,49 @@ type Handler struct {
 	templateFiles  fs.FS
 }
 
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(statusCode int) {
+	rw.statusCode = statusCode
+	rw.ResponseWriter.WriteHeader(statusCode)
+}
+
+type ErrorPage struct {
+	Code    int
+	Message string
+}
+
+func (h Handler) Error(w http.ResponseWriter, error string, code int) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(code)
+	ep := ErrorPage{
+		Code:    code,
+		Message: error,
+	}
+
+	tf := "default"
+	switch code {
+	case 400, 401, 402, 403, 404:
+		tf = "4xx"
+	case 500, 501, 503:
+		tf = "5xx"
+	}
+
+	tpl := fmt.Sprintf("%s.html", tf)
+	t := h.Templates.Lookup(tpl)
+	if t == nil {
+		log.Fatalln("unable to find template")
+	}
+
+	if err := t.Execute(w, ep); err != nil {
+		log.Fatalln(err)
+	}
+}
+
 // const (
 // 	adminLoginPath = "/adminLogin"
 // )
@@ -41,10 +89,13 @@ func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc
 	h := &Handler{
 		sessionManager: sm,
 		decoder:        formdecoder,
-		hrmSvc:         hrmService{userpb.NewUserServiceClient(hrmConn)},
-		baseurl:        baseurl,
-		staticFiles:    staticFiles,
-		templateFiles:  templateFiles,
+		hrmSvc: hrmService{userpb.NewUserServiceClient(hrmConn),
+			eventpb.NewEventServiceClient(hrmConn),
+			eventTypepb.NewEventTypeServiceClient(hrmConn),
+		},
+		baseurl:       baseurl,
+		staticFiles:   staticFiles,
+		templateFiles: templateFiles,
 	}
 
 	h.ParseTemplates()
@@ -81,18 +132,19 @@ func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc
 	r.Use(middleware.Recoverer)
 	r.Use(VerbMethod)
 
-	// r.Get("/admincreate", h.AdminCreate)
-	// r.Post("/admincreate", h.AdminCreateProcess)
+	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.FS(h.staticFiles))))
+	r.Group(func(r chi.Router) {
+		r.Use(sm.LoadAndSave)
+		r.Get("/", h.Home)
+		r.Get("/register", h.Register)
+		r.Post("/register", h.RegisterPost)
+		r.Get("/login", h.Login)
+		r.Post("/login", h.LoginPostHandler)
 
-	// r.Group(func(r chi.Router) {
-	// 	r.Use(sm.LoadAndSave)
-	// 	r.Use(h.AuthenticationForLogin)
-	// 	r.Get(adminLoginPath, h.AdminLogin)
-	// 	r.Post(adminLoginPath, h.AdminLoginProcess)
-	// })
+	})
 
 	// For Template Asset Prefixes
-	r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.FS(h.staticFiles))))
+	// r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.FS(h.staticFiles))))
 	// r.Handle(assetsPrefixForSubjectEdit+"*", http.StripPrefix(assetsPrefixForSubjectEdit, http.FileServer(filesDir)))
 	// r.Handle(assetsPrefixForSubjectUpdate+"*", http.StripPrefix(assetsPrefixForSubjectUpdate, http.FileServer(filesDir)))
 	// r.Handle(assetsPrefixForStudentEdit+"*", http.StripPrefix(assetsPrefixForStudentEdit, http.FileServer(filesDir)))
@@ -114,47 +166,49 @@ func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc
 	// 	r.Get("/admin/delete/{id:[0-9]+}", h.DeleteAdmin)
 	// })
 
-	// r.Group(func(r chi.Router) {
-	// 	r.Use(sm.LoadAndSave)
-	// 	r.Use(h.Authentication)
-	// 	r.Get("/dashboard", h.Dashboard)
-	// 	r.Get("/adminlist", h.AdminList)
+	r.Group(func(r chi.Router) {
+		r.Use(sm.LoadAndSave)
+		r.Use(h.Authentication)
+		r.Get("/eventtype", h.EventTypeListForUser)
+		r.Get("/events", h.EventForUser)
+		r.Get("/evunderevtype/{id:[0-9]+}", h.EventUnderEventTypeForUser)
+		// r.Get("/adminlist", h.AdminList)
 
-	// 	// Class Route
-	// 	r.Get("/classcreate", h.ClassCreate)
-	// 	r.Post("/classcreate", h.ClassCreateProcess)
-	// 	r.Get("/classlist", h.ClassList)
-	// 	r.Get("/class/edit/{id:[0-9]+}", h.EditClass)
-	// 	r.Put("/class/update/{id:[0-9]+}", h.ClassUpdate)
-	// 	r.Get("/class/delete/{id:[0-9]+}", h.DeleteClass)
+		// 	// Class Route
+		// 	r.Get("/classcreate", h.ClassCreate)
+		// 	r.Post("/classcreate", h.ClassCreateProcess)
+		// 	r.Get("/classlist", h.ClassList)
+		// 	r.Get("/class/edit/{id:[0-9]+}", h.EditClass)
+		// 	r.Put("/class/update/{id:[0-9]+}", h.ClassUpdate)
+		// 	r.Get("/class/delete/{id:[0-9]+}", h.DeleteClass)
 
-	// 	// Subject Route
-	// 	r.Get("/subjectcreate", h.SubjectCreate)
-	// 	r.Post("/subjectcreate", h.SubjectCreateProcess)
-	// 	r.Get("/subjectlist", h.SubjectList)
-	// 	r.Get("/subject/edit/{id:[0-9]+}", h.SubjectEdit)
-	// 	r.Put("/subject/update/{id:[0-9]+}", h.SubjectUpdate)
-	// 	r.Get("/subject/delete/{id:[0-9]+}", h.DeleteSubject)
+		// 	// Subject Route
+		// 	r.Get("/subjectcreate", h.SubjectCreate)
+		// 	r.Post("/subjectcreate", h.SubjectCreateProcess)
+		// 	r.Get("/subjectlist", h.SubjectList)
+		// 	r.Get("/subject/edit/{id:[0-9]+}", h.SubjectEdit)
+		// 	r.Put("/subject/update/{id:[0-9]+}", h.SubjectUpdate)
+		// 	r.Get("/subject/delete/{id:[0-9]+}", h.DeleteSubject)
 
-	// 	// Admit Student
-	// 	r.Get("/admitstudent", h.AdmitStudent)
-	// 	r.Post("/admitstudent", h.AdmitStudentProcess)
-	// 	r.Get("/admitstudentlist", h.AdmitStudentlist)
-	// 	r.Get("/admitstudent/edit/{id:[0-9]+}", h.AdmitStudentEdit)
-	// 	r.Put("/admitstudent/update/{id:[0-9]+}", h.AdmitStudentUpdate)
-	// 	r.Get("/admitstudent/delete/{id:[0-9]+}", h.DeleteAdmitStudent)
+		// 	// Admit Student
+		// 	r.Get("/admitstudent", h.AdmitStudent)
+		// 	r.Post("/admitstudent", h.AdmitStudentProcess)
+		// 	r.Get("/admitstudentlist", h.AdmitStudentlist)
+		// 	r.Get("/admitstudent/edit/{id:[0-9]+}", h.AdmitStudentEdit)
+		// 	r.Put("/admitstudent/update/{id:[0-9]+}", h.AdmitStudentUpdate)
+		// 	r.Get("/admitstudent/delete/{id:[0-9]+}", h.DeleteAdmitStudent)
 
-	// 	r.Get("/addmark/{id:[0-9]+}", h.AddMark)
-	// 	r.Post("/markstore", h.Markstore)
-	// 	r.Get("/profile/{id:[0-9]+}", h.Profile)
-	// 	r.Get("/editmark/{id:[0-9]+}", h.EditMark)
-	// 	r.Post("/updatemark/{id:[0-9]+}", h.MarkUpdate)
-	// 	r.Get("/deletemark/{id:[0-9]+}", h.DeleteMark)
+		// 	r.Get("/addmark/{id:[0-9]+}", h.AddMark)
+		// 	r.Post("/markstore", h.Markstore)
+		// 	r.Get("/profile/{id:[0-9]+}", h.Profile)
+		// 	r.Get("/editmark/{id:[0-9]+}", h.EditMark)
+		// 	r.Post("/updatemark/{id:[0-9]+}", h.MarkUpdate)
+		// 	r.Get("/deletemark/{id:[0-9]+}", h.DeleteMark)
 
-	// 	r.Get("/addadmin", h.AdminAdd)
-	// 	r.Post("/addadmin", h.AddAdminCreateProcess)
-	// 	r.Get("/adminlogout", h.AdminLogOut)
-	// })
+		// 	r.Get("/addadmin", h.AdminAdd)
+		// 	r.Post("/addadmin", h.AddAdminCreateProcess)
+		// 	r.Get("/adminlogout", h.AdminLogOut)
+	})
 
 	return r
 }
@@ -178,20 +232,15 @@ func VerbMethod(next http.Handler) http.Handler {
 
 func (h Handler) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		username := h.sessionManager.GetString(r.Context(), "username")
-		if username == "" {
-			http.Redirect(w, r, "/adminLogin", http.StatusSeeOther)
+		userID := h.sessionManager.GetString(r.Context(), "userID")
+		uID, err := strconv.Atoi(userID)
+		if err != nil {
+			log.Println(err)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (h Handler) AuthenticationForLogin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		username := h.sessionManager.GetString(r.Context(), "username")
-		if username != "" {
-			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		if uID == 0 {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -205,7 +254,7 @@ func (h *Handler) ParseTemplates() error {
 		},
 	}).Funcs(sprig.FuncMap())
 
-	tmpl := template.Must(templates.ParseFS(h.templateFiles, "*.html"))
+	tmpl := template.Must(templates.ParseFS(h.templateFiles, "*/*.html", "*.html"))
 	if tmpl == nil {
 		log.Fatalln("unable to parse templates")
 	}

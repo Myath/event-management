@@ -19,6 +19,7 @@ type EventCore interface {
 	EventListWithFilter(s storage.EventFilter) ([]storage.Event, error)
 	PublishedDateForm(s storage.Event) (*storage.Event, error)
 	PublishedEvent(s storage.Event) (*storage.Event, error)
+	ListEventsUnderEventTypeWithFilter(s storage.EventFilter, se storage.Event) ([]storage.Event, error)
 }
 
 type EventSvc struct {
@@ -227,5 +228,42 @@ func (es EventSvc) PublishedEvent(ctx context.Context, r *eventpb.PublishedEvent
 	return &eventpb.PublishedEventResponse{
 		ID:          int32(et.ID),
 		PublishedAt: timestamppb.New(et.PublishedAt.Time),
+	}, nil
+}
+
+func (es EventSvc) EventListUnderEvent(ctx context.Context, r *eventpb.EventListUnderEventRequest) (*eventpb.EventListUnderEventResponse, error){
+	eventListUnderEventType := storage.EventFilter{
+		SearchTerm: r.GetSearchTerm(),
+	}
+
+	eventTypeID := storage.Event{
+		EventTypeId:   int(r.GetEventTypeId()),
+	}
+
+	ev, err :=  es.Core.ListEventsUnderEventTypeWithFilter(eventListUnderEventType, eventTypeID)
+	if err != nil {
+		return nil, err
+	}
+
+	var allEvents []*eventpb.EventList
+	for _, evt := range ev {
+		event := &eventpb.EventList{
+			ID:          int32(evt.ID),
+			EventTypeId: int32(evt.EventTypeId),
+			EventTypeName : evt.EventTypeName,
+			EventName:   evt.EventName,
+			Description: evt.Description,
+			Location:    evt.Location,
+			StartAt:     timestamppb.New(evt.StartAt),
+			EndAt:       timestamppb.New(evt.EndAt),
+			PublishedAt: timestamppb.New(evt.PublishedAt.Time),
+		}
+		allEvents = append(allEvents, event)
+	}
+	return &eventpb.EventListUnderEventResponse{
+		EvUnEvType: &eventpb.EventFilterList{
+			AllEvent:   allEvents,
+			SearchTerm: eventListUnderEventType.SearchTerm,
+		},
 	}, nil
 }
