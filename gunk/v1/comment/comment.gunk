@@ -19,18 +19,12 @@ type Comments struct {
 }
 
 type CommentList struct {
-	ID            int       `pb:"1"`
-	UserId        int       `pb:"2"`
-	Username      string    `pb:"3"`
-	EventID       int       `pb:"4"`
-	EventTypeName string    `pb:"5"`
-	EventName     string    `pb:"6"`
-	Description   string    `pb:"7"`
-	Location      string    `pb:"8"`
-	StartAt       time.Time `pb:"9"`
-	EndAt         time.Time `pb:"10"`
-	PublishedAt   time.Time `pb:"11"`
-	Comment       string    `pb:"12"`
+	ID       int    `pb:"1"`
+	UserId   int    `pb:"2"`
+	Username string `pb:"3"`
+	IsAdmin  bool   `pb:"4"`
+	EventID  int    `pb:"5"`
+	Comment  string `pb:"6"`
 }
 
 type CreateCommentRequest struct {

@@ -30,7 +30,7 @@ type Event struct {
 type EventFilter struct {
 	AllEvents  []Event
 	SearchTerm string
-	UserID     string
+	SeUserID     string
 }
 
 func (h Handler) EventForUser(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func (h Handler) EventForUser(w http.ResponseWriter, r *http.Request) {
 	Data := EventFilter{
 		AllEvents:  allEvents,
 		SearchTerm: ad,
-		UserID:     userID,
+		SeUserID:     userID,
 	}
 
 	h.ParseEventTemplate(w, Data)

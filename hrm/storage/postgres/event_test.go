@@ -581,3 +581,104 @@ func TestPublishedEvent(t *testing.T) {
 		})
 	}
 }
+
+func TestPostgresStorage_ListEventsUnderEventType(t *testing.T) {
+	s, tr := NewTestStorage(getDBConnectionString(), getMigrationDir())
+	t.Parallel()
+	t.Cleanup(func() {
+		tr()
+	})
+
+	eventTypes := []storage.EventTypes{
+		{
+			EventTypeName: "Tour",
+		},
+
+		{
+			EventTypeName: "wedding",
+		},
+
+		{
+			EventTypeName: "Catering",
+		},
+	}
+
+	for _, eventType := range eventTypes {
+		_, err := s.CreateEventType(eventType)
+		if err != nil {
+			t.Fatalf("unable to create evenType for list eventType testing %v", err)
+		}
+	}
+
+	events := []storage.Event{
+		{
+			EventTypeId: 2,
+			EventName:   "Tour Of Sundarbon 2033",
+			Description: "Tour of Sundarbon 2023, All are invited",
+			Location:    "Sundarbon",
+			StartAt:     time.Time{},
+			EndAt:       time.Time{},
+			PublishedAt: sql.NullTime{},
+		},
+		{
+			EventTypeId: 2,
+			EventName:   "Tour Of Kuyakta 2033",
+			Description: "Tour of Kuyakata 2023, All are invited",
+			Location:    "Kuyakata",
+			StartAt:     time.Time{},
+			EndAt:       time.Time{},
+			PublishedAt: sql.NullTime{},
+		},
+		{
+			EventTypeId: 2,
+			EventName:   "Happy Wedding of Shima+Rakib",
+			Description: "Happy Wedding of Shima+Rakib, All are invited",
+			Location:    "Khulna",
+			StartAt:     time.Time{},
+			EndAt:       time.Time{},
+			PublishedAt: sql.NullTime{},
+		},
+	}
+
+	for _, event := range events {
+		_, err := s.InsertEvent(event)
+		if err != nil {
+			t.Fatalf("unable to create event for list eventType testing %v", err)
+		}
+	}
+
+	tests := []struct {
+		name    string
+		in      storage.EventFilter
+		want    []storage.Event
+		wantErr bool
+	}{
+		{
+			name: "EVENT_LIST_UNDER_EVENT_TYPE_SUCCESS",
+			in:   storage.EventFilter{
+				SearchTerm:  "",
+				EventTypeId: 2,
+			},
+			want: events,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := s.ListEventsUnderEventType(tt.in)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PostgresStorage.ListEventsUnderEventType() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			opts := cmp.Options{
+				cmpopts.IgnoreFields(storage.Event{}, "ID", "EventTypeName", "CreatedAt", "UpdatedAt", "DeletedAt"),
+			}
+
+			sort.SliceStable(got, func(i, j int) bool {
+				return got[i].ID < got[j].ID
+			})
+			if !cmp.Equal(got, tt.want, opts...) {
+				t.Errorf("PostgresStorage.ListEventsUnderEventType() diff = %v", cmp.Diff(got, tt.want, opts...))
+			}
+		})
+	}
+}

@@ -12,6 +12,8 @@ import (
 	eventpb "event-management/gunk/v1/event"
 	eventTypepb "event-management/gunk/v1/eventType"
 	userpb "event-management/gunk/v1/user"
+	commentpb "event-management/gunk/v1/comment"
+	usereventpb "event-management/gunk/v1/userEvent"
 
 	"github.com/Masterminds/sprig"
 	"github.com/alexedwards/scs/v2"
@@ -26,6 +28,8 @@ type hrmService struct {
 	userpb.UserServiceClient
 	eventpb.EventServiceClient
 	eventTypepb.EventTypeServiceClient
+	commentpb.CommentServiceClient
+	usereventpb.UserEventServiceClient
 }
 
 type Handler struct {
@@ -81,10 +85,6 @@ func (h Handler) Error(w http.ResponseWriter, error string, code int) {
 	}
 }
 
-// const (
-// 	adminLoginPath = "/adminLogin"
-// )
-
 func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc.ClientConn, baseurl string, staticFiles, templateFiles fs.FS) *chi.Mux {
 	h := &Handler{
 		sessionManager: sm,
@@ -92,6 +92,8 @@ func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc
 		hrmSvc: hrmService{userpb.NewUserServiceClient(hrmConn),
 			eventpb.NewEventServiceClient(hrmConn),
 			eventTypepb.NewEventTypeServiceClient(hrmConn),
+			commentpb.NewCommentServiceClient(hrmConn),
+			usereventpb.NewUserEventServiceClient(hrmConn),
 		},
 		baseurl:       baseurl,
 		staticFiles:   staticFiles,
@@ -112,20 +114,6 @@ func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	//Make Template prefix variable
-	// assetsPrefixForSubjectEdit := "/subject/edit/static/"
-	// assetsPrefixForSubjectUpdate := "/subject/update/static/"
-	// assetsPrefixForStudentEdit := "/admitstudent/edit/static/"
-	// assetsPrefixForStudentUpdate := "/admitstudent/update/static/"
-	// assetsPrefixForClassEdit := "/class/edit/static/"
-	// assetsPrefixForClassUpdate := "/class/update/static/"
-	// assetsPrefixForAdminEdit := "/admin/edit/static/"
-	// assetsPrefixForAdminUpdate := "/admin/update/static/"
-	// assetsPrefixForAddMark := "/addmark/static/"
-	// assetsPrefixForProfile := "/profile/static/"
-	// assetsPrefixForEditMark:= "/editmark/static/"
-	// assetsPrefixForUpdateMark:= "/updatemark/static/"
-
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
@@ -140,74 +128,24 @@ func NewHandler(sm *scs.SessionManager, formdecoder *form.Decoder, hrmConn *grpc
 		r.Post("/register", h.RegisterPost)
 		r.Get("/login", h.Login)
 		r.Post("/login", h.LoginPostHandler)
+		r.Get("/logout", h.Logout)
 
 	})
-
-	// For Template Asset Prefixes
-	// r.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.FS(h.staticFiles))))
-	// r.Handle(assetsPrefixForSubjectEdit+"*", http.StripPrefix(assetsPrefixForSubjectEdit, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForSubjectUpdate+"*", http.StripPrefix(assetsPrefixForSubjectUpdate, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForStudentEdit+"*", http.StripPrefix(assetsPrefixForStudentEdit, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForStudentUpdate+"*", http.StripPrefix(assetsPrefixForStudentUpdate, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForClassEdit+"*", http.StripPrefix(assetsPrefixForClassEdit, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForClassUpdate+"*", http.StripPrefix(assetsPrefixForClassUpdate, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForAdminEdit+"*", http.StripPrefix(assetsPrefixForAdminEdit, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForAdminUpdate+"*", http.StripPrefix(assetsPrefixForAdminUpdate, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForAddMark+"*", http.StripPrefix(assetsPrefixForAddMark, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForProfile+"*", http.StripPrefix(assetsPrefixForProfile, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForEditMark+"*", http.StripPrefix(assetsPrefixForEditMark, http.FileServer(filesDir)))
-	// r.Handle(assetsPrefixForUpdateMark+"*", http.StripPrefix(assetsPrefixForUpdateMark, http.FileServer(filesDir)))
-
-	// r.Group(func(r chi.Router) {
-	// 	r.Use(sm.LoadAndSave)
-	// 	r.Use(h.Authentication)
-	// 	r.Get("/admin/edit/{id:[0-9]+}", h.AdminEdit)
-	// 	r.Put("/admin/update/{id:[0-9]+}", h.AdminUpdate)
-	// 	r.Get("/admin/delete/{id:[0-9]+}", h.DeleteAdmin)
-	// })
 
 	r.Group(func(r chi.Router) {
 		r.Use(sm.LoadAndSave)
 		r.Use(h.Authentication)
+		r.Get("/dashboard", h.Admin)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(sm.LoadAndSave)
 		r.Get("/eventtype", h.EventTypeListForUser)
 		r.Get("/events", h.EventForUser)
 		r.Get("/evunderevtype/{id:[0-9]+}", h.EventUnderEventTypeForUser)
-		// r.Get("/adminlist", h.AdminList)
+		r.Get("/commentdetails/{id:[0-9]+}", h.EventsCommentStatus)
+		r.Post("/commentadd/{id:[0-9]+}", h.AddCommentByUser)
 
-		// 	// Class Route
-		// 	r.Get("/classcreate", h.ClassCreate)
-		// 	r.Post("/classcreate", h.ClassCreateProcess)
-		// 	r.Get("/classlist", h.ClassList)
-		// 	r.Get("/class/edit/{id:[0-9]+}", h.EditClass)
-		// 	r.Put("/class/update/{id:[0-9]+}", h.ClassUpdate)
-		// 	r.Get("/class/delete/{id:[0-9]+}", h.DeleteClass)
-
-		// 	// Subject Route
-		// 	r.Get("/subjectcreate", h.SubjectCreate)
-		// 	r.Post("/subjectcreate", h.SubjectCreateProcess)
-		// 	r.Get("/subjectlist", h.SubjectList)
-		// 	r.Get("/subject/edit/{id:[0-9]+}", h.SubjectEdit)
-		// 	r.Put("/subject/update/{id:[0-9]+}", h.SubjectUpdate)
-		// 	r.Get("/subject/delete/{id:[0-9]+}", h.DeleteSubject)
-
-		// 	// Admit Student
-		// 	r.Get("/admitstudent", h.AdmitStudent)
-		// 	r.Post("/admitstudent", h.AdmitStudentProcess)
-		// 	r.Get("/admitstudentlist", h.AdmitStudentlist)
-		// 	r.Get("/admitstudent/edit/{id:[0-9]+}", h.AdmitStudentEdit)
-		// 	r.Put("/admitstudent/update/{id:[0-9]+}", h.AdmitStudentUpdate)
-		// 	r.Get("/admitstudent/delete/{id:[0-9]+}", h.DeleteAdmitStudent)
-
-		// 	r.Get("/addmark/{id:[0-9]+}", h.AddMark)
-		// 	r.Post("/markstore", h.Markstore)
-		// 	r.Get("/profile/{id:[0-9]+}", h.Profile)
-		// 	r.Get("/editmark/{id:[0-9]+}", h.EditMark)
-		// 	r.Post("/updatemark/{id:[0-9]+}", h.MarkUpdate)
-		// 	r.Get("/deletemark/{id:[0-9]+}", h.DeleteMark)
-
-		// 	r.Get("/addadmin", h.AdminAdd)
-		// 	r.Post("/addadmin", h.AddAdminCreateProcess)
-		// 	r.Get("/adminlogout", h.AdminLogOut)
 	})
 
 	return r

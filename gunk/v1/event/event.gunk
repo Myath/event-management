@@ -38,6 +38,19 @@ type EventList struct {
 	PublishedAt   time.Time `pb:"9"`
 }
 
+type SingleEventWithComments struct {
+	ID            int       `pb:"1"`
+	EventTypeId   int       `pb:"2"`
+	EventTypeName string    `pb:"3"`
+	EventName     string    `pb:"4"`
+	Description   string    `pb:"5"`
+	Location      string    `pb:"6"`
+	Comment       string    `pb:"7"`
+	StartAt       time.Time `pb:"8"`
+	EndAt         time.Time `pb:"9"`
+	PublishedAt   time.Time `pb:"10"`
+}
+
 type EventFilterList struct {
 	AllEvent   []EventList `pb:"1"`
 	SearchTerm string      `pb:"2"`
@@ -107,12 +120,10 @@ type PublishedEventResponse struct {
 }
 
 type EventListUnderEventRequest struct {
-	SearchTerm string `pb:"1"`
-	EventTypeId int `pb:"2"`
+	SearchTerm  string `pb:"1"`
+	EventTypeId int    `pb:"2"`
 }
 
 type EventListUnderEventResponse struct {
 	EvUnEvType EventFilterList `pb:"1"`
 }
-
-

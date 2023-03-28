@@ -93,12 +93,14 @@ type Event struct {
 	StartAt       time.Time    `json:"start_at" db:"start_at"`
 	EndAt         time.Time    `json:"end_at" db:"end_at"`
 	PublishedAt   sql.NullTime `json:"published_at" db:"published_at"`
+	Comment       string       `json:"comment" db:"comment"`
 	CreatedAt     time.Time    `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time    `json:"updated_at" db:"updated_at"`
 	DeletedAt     sql.NullTime `json:"deleted_at" db:"deleted_at"`
 }
 type EventFilter struct {
 	SearchTerm string
+	EventTypeId   int
 }
 
 func (e Event) Validate() error {
