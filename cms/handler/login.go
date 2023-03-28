@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -61,20 +62,6 @@ func (h Handler) LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if err := lf.Validate(); err != nil {
-	// 	if vErr, ok := err.(validation.Errors); ok {
-	// 		formErr := make(map[string]error)
-	// 		for key, val := range vErr {
-	// 			formErr[strings.Title(key)] = val
-	// 		}
-	// 		lf.FormError = formErr
-	// 		lf.Password = ""
-	// 		lf.CSRFToken = nosurf.Token(r)
-	// 		h.pareseLoginTemplate(w, lf)
-	// 		return
-	// 	}
-	// }
-
 	if err := loginUser.Validate(); err != nil {
 		if vErr, ok := err.(validation.Errors); ok {
 			loginUser.FormError = vErr
@@ -92,21 +79,29 @@ func (h Handler) LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 		Password: loginUser.Password,
 	})
 	if err != nil {
-		log.Println(err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		h.pareseLoginTemplate(w, LoginUserForm{
+			LoginUser: loginUser,
+			FormError: map[string]error{
+				"Username": fmt.Errorf("credentials does not match"),
+			},
+			CSRFToken: nosurf.Token(r),
+		})
 		return
 	}
 
 	h.sessionManager.Put(r.Context(), "userID", strconv.Itoa(int(u.GetUser().ID)))
 
-	
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	if u.User.IsAdmin {
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+	}else{
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
 }
 
 func (h Handler) pareseLoginTemplate(w http.ResponseWriter, data any) {
 	t := h.Templates.Lookup("login.html")
 	if t == nil {
-		log.Println("unaable to lookup login template")
+		log.Println("unable to lookup login template")
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
 

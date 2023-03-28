@@ -73,19 +73,16 @@ func (p PostgresStorage) UpdateComment(s storage.Comments) (*storage.Comments, e
 	return &s, nil
 }
 
-const CommentsOfEventQuery = `SELECT comments.event_id, events.event_type_id, event_type_name, event_name, description, location, start_at, end_at, published_at, comment, comments.id, event_types.id, users.username, comments.user_id, users.is_admin
+const CommentsOfEventQuery = `SELECT comments.event_id, comment, comments.id, users.username, comments.user_id, users.is_admin
 FROM comments
-INNER JOIN events ON comments.event_id = events.ID
-INNER JOIN event_types ON events.event_type_id = event_types.id
 INNER JOIN users ON comments.user_id = users.id
-WHERE events.deleted_at IS NULL AND event_types.deleted_at IS NULL AND users.is_admin = false AND comments.event_id = $1
+WHERE users.is_admin = false AND comments.event_id = $1
 ORDER BY comments.created_at DESC
 ;`
 
-func (p PostgresStorage) CommentsOfEvent(id int) ([]storage.Comments, error) {
-
+func (p PostgresStorage) CommentsOfEvent(eventID int) ([]storage.Comments, error) {
 	var comment []storage.Comments
-	if err := p.DB.Select(&comment, CommentsOfEventQuery, id); err != nil {
+	if err := p.DB.Select(&comment, CommentsOfEventQuery, eventID); err != nil {
 		log.Println(err)
 		return nil, err
 	}

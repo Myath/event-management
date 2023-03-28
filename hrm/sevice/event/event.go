@@ -13,13 +13,13 @@ import (
 
 type EventCore interface {
 	InsertEvent(s storage.Event) (*storage.Event, error)
-	EditUser(s storage.Event) (*storage.Event, error)
+	EventEdit(s storage.Event) (*storage.Event, error)
 	UpdateEvent(s storage.Event) (*storage.Event, error)
 	DeleteEvent(s storage.Event) error
 	EventListWithFilter(s storage.EventFilter) ([]storage.Event, error)
 	PublishedDateForm(s storage.Event) (*storage.Event, error)
 	PublishedEvent(s storage.Event) (*storage.Event, error)
-	ListEventsUnderEventTypeWithFilter(s storage.EventFilter, se storage.Event) ([]storage.Event, error)
+	ListEventsUnderEventTypeWithFilter(s storage.EventFilter) ([]storage.Event, error)
 }
 
 type EventSvc struct {
@@ -81,7 +81,7 @@ func (es EventSvc) EditEvent(ctx context.Context, r *eventpb.EditEventRequest) (
 		ID: int(r.GetID()),
 	}
 
-	et, err := es.Core.EditUser(eventID)
+	et, err := es.Core.EventEdit(eventID)
 	if err != nil {
 		return nil, err
 	}
@@ -156,13 +156,12 @@ func (es EventSvc) DeleteEvent(ctx context.Context, r *eventpb.DeleteEventReques
 	return &eventpb.DeleteEventResponse{}, nil
 }
 
-
-func (es EventSvc) EventList(ctx context.Context, r *eventpb.EventListRequest) (*eventpb.EventListResponse, error){
+func (es EventSvc) EventList(ctx context.Context, r *eventpb.EventListRequest) (*eventpb.EventListResponse, error) {
 	eventList := storage.EventFilter{
 		SearchTerm: r.GetSearchTerm(),
 	}
 
-	ev, err :=  es.Core.EventListWithFilter(eventList)
+	ev, err := es.Core.EventListWithFilter(eventList)
 	if err != nil {
 		return nil, err
 	}
@@ -170,15 +169,15 @@ func (es EventSvc) EventList(ctx context.Context, r *eventpb.EventListRequest) (
 	var allEvents []*eventpb.EventList
 	for _, evt := range ev {
 		event := &eventpb.EventList{
-			ID:          int32(evt.ID),
-			EventTypeId: int32(evt.EventTypeId),
-			EventTypeName : evt.EventTypeName,
-			EventName:   evt.EventName,
-			Description: evt.Description,
-			Location:    evt.Location,
-			StartAt:     timestamppb.New(evt.StartAt),
-			EndAt:       timestamppb.New(evt.EndAt),
-			PublishedAt: timestamppb.New(evt.PublishedAt.Time),
+			ID:            int32(evt.ID),
+			EventTypeId:   int32(evt.EventTypeId),
+			EventTypeName: evt.EventTypeName,
+			EventName:     evt.EventName,
+			Description:   evt.Description,
+			Location:      evt.Location,
+			StartAt:       timestamppb.New(evt.StartAt),
+			EndAt:         timestamppb.New(evt.EndAt),
+			PublishedAt:   timestamppb.New(evt.PublishedAt.Time),
 		}
 		allEvents = append(allEvents, event)
 	}
@@ -190,7 +189,7 @@ func (es EventSvc) EventList(ctx context.Context, r *eventpb.EventListRequest) (
 	}, nil
 }
 
-func (es EventSvc) PublishedDateForm(ctx context.Context, r *eventpb.PublishedDateFormRequest) (*eventpb.PublishedDateFormResponse, error){
+func (es EventSvc) PublishedDateForm(ctx context.Context, r *eventpb.PublishedDateFormRequest) (*eventpb.PublishedDateFormResponse, error) {
 	eventID := storage.Event{
 		ID: int(r.GetID()),
 	}
@@ -206,7 +205,7 @@ func (es EventSvc) PublishedDateForm(ctx context.Context, r *eventpb.PublishedDa
 	}, nil
 }
 
-func (es EventSvc) PublishedEvent(ctx context.Context, r *eventpb.PublishedEventRequest) (*eventpb.PublishedEventResponse, error){
+func (es EventSvc) PublishedEvent(ctx context.Context, r *eventpb.PublishedEventRequest) (*eventpb.PublishedEventResponse, error) {
 	publishedAt := sql.NullTime{}
 	if r.GetPublishedAt() != nil {
 		publishedAt = sql.NullTime{
@@ -231,16 +230,13 @@ func (es EventSvc) PublishedEvent(ctx context.Context, r *eventpb.PublishedEvent
 	}, nil
 }
 
-func (es EventSvc) EventListUnderEvent(ctx context.Context, r *eventpb.EventListUnderEventRequest) (*eventpb.EventListUnderEventResponse, error){
+func (es EventSvc) EventListUnderEvent(ctx context.Context, r *eventpb.EventListUnderEventRequest) (*eventpb.EventListUnderEventResponse, error) {
 	eventListUnderEventType := storage.EventFilter{
-		SearchTerm: r.GetSearchTerm(),
+		SearchTerm:  r.GetSearchTerm(),
+		EventTypeId: int(r.GetEventTypeId()),
 	}
 
-	eventTypeID := storage.Event{
-		EventTypeId:   int(r.GetEventTypeId()),
-	}
-
-	ev, err :=  es.Core.ListEventsUnderEventTypeWithFilter(eventListUnderEventType, eventTypeID)
+	ev, err := es.Core.ListEventsUnderEventTypeWithFilter(eventListUnderEventType)
 	if err != nil {
 		return nil, err
 	}
@@ -248,15 +244,15 @@ func (es EventSvc) EventListUnderEvent(ctx context.Context, r *eventpb.EventList
 	var allEvents []*eventpb.EventList
 	for _, evt := range ev {
 		event := &eventpb.EventList{
-			ID:          int32(evt.ID),
-			EventTypeId: int32(evt.EventTypeId),
-			EventTypeName : evt.EventTypeName,
-			EventName:   evt.EventName,
-			Description: evt.Description,
-			Location:    evt.Location,
-			StartAt:     timestamppb.New(evt.StartAt),
-			EndAt:       timestamppb.New(evt.EndAt),
-			PublishedAt: timestamppb.New(evt.PublishedAt.Time),
+			ID:            int32(evt.ID),
+			EventTypeId:   int32(evt.EventTypeId),
+			EventTypeName: evt.EventTypeName,
+			EventName:     evt.EventName,
+			Description:   evt.Description,
+			Location:      evt.Location,
+			StartAt:       timestamppb.New(evt.StartAt),
+			EndAt:         timestamppb.New(evt.EndAt),
+			PublishedAt:   timestamppb.New(evt.PublishedAt.Time),
 		}
 		allEvents = append(allEvents, event)
 	}

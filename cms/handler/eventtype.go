@@ -18,6 +18,7 @@ type EventTypes struct {
 type EventTypesFilter struct {
 	AllEventsType []EventTypes
 	SearchTerm string
+	SeUserID string
 }
 
 func (e EventTypes) Validate() error {
@@ -54,9 +55,12 @@ func (h Handler) EventTypeListForUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	uID := h.SessionIDGet(w, r)
+
 	Data := EventTypesFilter{
 		AllEventsType: allEventsType,
 		SearchTerm:    ad,
+		SeUserID:      uID,
 	}
 
 	h.ParseEventTypeTemplate(w, Data)

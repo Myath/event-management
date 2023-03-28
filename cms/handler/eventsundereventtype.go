@@ -33,12 +33,12 @@ type EventUnderEventType struct {
 type EventUnderEventTypeFilter struct {
 	AllEventUnderEventType []EventUnderEventType
 	SearchTerm             string
-	UserID                 string
+	SeUserID                 string
 }
 
 func (h Handler) EventUnderEventTypeForUser(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	uID, err := strconv.Atoi(id)
+	eventID, err := strconv.Atoi(id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func (h Handler) EventUnderEventTypeForUser(w http.ResponseWriter, r *http.Reque
 
 	u, err := h.hrmSvc.EventListUnderEvent(r.Context(), &eventpb.EventListUnderEventRequest{
 		SearchTerm:  ad,
-		EventTypeId: int32(uID),
+		EventTypeId: int32(eventID),
 	})
 	if err != nil {
 		log.Println(err)
@@ -95,7 +95,7 @@ func (h Handler) EventUnderEventTypeForUser(w http.ResponseWriter, r *http.Reque
 	Data := EventUnderEventTypeFilter{
 		AllEventUnderEventType: allEvents,
 		SearchTerm:             ad,
-		UserID:                 userID,
+		SeUserID:                 userID,
 	}
 
 	h.ParseUnderEventTypeTemplate(w, Data)

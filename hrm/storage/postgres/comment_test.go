@@ -572,7 +572,7 @@ func TestCommentsOfEvent(t *testing.T) {
 	}
 
 	sort.SliceStable(comments, func(i, j int) bool {
-		return comments[i].UserId > comments[j].UserId
+		return comments[i].UserId < comments[j].UserId
 	})
 
 	tests := []struct {

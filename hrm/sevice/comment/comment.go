@@ -4,8 +4,6 @@ import (
 	"context"
 	commentpb "event-management/gunk/v1/comment"
 	"event-management/hrm/storage"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type CommentCore interface {
@@ -79,10 +77,6 @@ func (cs CommentSvc) UpdateComment(xtc context.Context, r *commentpb.UpdateComme
 		Comment: r.GetComment(),
 	}
 
-	if err := comment.Validate(); err != nil {
-		return nil, err //TODO:: will fix when implement this service in cms
-	}
-
 	ct, err := cs.core.UpdateComment(comment)
 	if err != nil {
 		return nil, err
@@ -112,18 +106,12 @@ func (cs CommentSvc) CommentListOfEVents(ctx context.Context, r *commentpb.Comme
 	var allCommentsOfEvent []*commentpb.CommentList
 	for _, sec := range ct{
 		commentlist := &commentpb.CommentList{
-			ID:            int32(sec.ID),
-			UserId:        int32(sec.UserId),
-			Username:      sec.Username,
-			EventID:       int32(sec.EventID),
-			EventTypeName: sec.EventTypeName,
-			EventName:     sec.EventTypeName,
-			Description:   sec.Description,
-			Location:      sec.Location,
-			StartAt:       timestamppb.New(sec.StartAt),
-			EndAt:         timestamppb.New(sec.EndAt),
-			PublishedAt:   timestamppb.New(sec.PublishedAt.Time),
-			Comment:       sec.Comment,
+			ID:       int32(sec.ID),
+			UserId:   int32(sec.UserId),
+			Username: sec.Username,
+			IsAdmin:  sec.IsAdmin,
+			EventID:  int32(sec.EventID),
+			Comment:  sec.Comment,
 		}
 		allCommentsOfEvent = append(allCommentsOfEvent, commentlist)
 	}

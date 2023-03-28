@@ -61,7 +61,11 @@
 
                 <div class="col-lg-3 d-none d-lg-block order-2 order-lg-3">
                     <div class="buy-tickets">
-                        <a class="btn gradient-bg" href="#">Buy Tickets</a>
+                        {{if ne .SeUserID ""}}
+                        <a class="btn gradient-bg" href="/logout">Logout</a>
+                        {{else}}
+                        <a class="btn gradient-bg" href="/login">Buy Tickets</a>
+                        {{end}}
                     </div><!-- .buy-tickets -->
                 </div><!-- .col -->
             </div><!-- .row -->
@@ -222,7 +226,7 @@
                 <div class="entry-content">
                     <p>Vestibulum eget lacus at mauris sagittis varius. Etiam ut venenatis dui. Nullam tellus risus, pellentesque at facilisis et, scelerisque sit amet metus. Duis vel semper turpis, ac tempus libero. Maecenas id ultrices risus. Aenean nec ornare ipsum, lacinia volutpat urna. Maecenas ut aliquam purus, quis sodales dolor.</p>
                 </div>
-                {{ if eq .UserID ""}}
+                {{ if eq .SeUserID ""}}
                 <footer class="entry-footer">
                     <a href="#" class="btn gradient-bg">Read More</a>
                     <a href="/register" class="btn dark">Register Now</a>
@@ -245,10 +249,10 @@
             <div class="col-12">
                 <div class="featured-events-wrap flex flex-wrap justify-content-between">
                     <div class="event-content-wrap positioning-event-1">
-                        <figure>
-                            <a href="#"><img src="/static/images/1.jpg" alt="1"></a>
-                        </figure>
                         {{if gt (len .AllEvents) 0}}
+                        <figure>
+                            <a href="/commentdetails/{{(index .AllEvents 0).ID}}"><img src="/static/images/1.jpg" alt="1"></a>
+                        </figure>
                         <header class="entry-header">
                             <h3 class="entry-title">{{(index .AllEvents 0).EventName}}</h3>
 
@@ -258,27 +262,29 @@
                     </div>
 
                     <div class="event-content-wrap positioning-event-2">
+                        {{if gt (len .AllEvents) 1}}
                         <figure>
-                            <a href="#"><img src="/static/images/2.jpg" alt=""></a>
+                            <a href="/commentdetails/{{(index .AllEvents 1).ID}}"><img src="/static/images/2.jpg" alt=""></a>
                         </figure>
-
                         <header class="entry-header">
-                            <h3 class="entry-title">Street art fest</h3>
+                            <h3 class="entry-title">{{(index .AllEvents 1).EventName}}</h3>
 
-                            <div class="posted-date">November 28</div>
+                            <div class="posted-date">{{(index .AllEvents 1).StartAtStr}}</div>
                         </header>
+                        {{end}}
                     </div>
 
                     <div class="event-content-wrap positioning-event-3">
+                        {{if gt (len .AllEvents) 2}}
                         <figure>
-                            <a href="#"><img src="/static/images/3.jpg" alt=""></a>
+                            <a href="/commentdetails/{{(index .AllEvents 2).ID}}"><img src="/static/images/3.jpg" alt=""></a>
                         </figure>
-
                         <header class="entry-header">
-                            <h3 class="entry-title">Anabelle in concert</h3>
+                            <h3 class="entry-title">{{(index .AllEvents 2).EventName}}</h3>
 
-                            <div class="posted-date">August 28</div>
+                            <div class="posted-date">{{(index .AllEvents 2).StartAtStr}}</div>
                         </header>
+                        {{end}}
                     </div>
 
                     <div class="event-content-wrap positioning-event-4 half">
@@ -300,39 +306,42 @@
                     </div>
 
                     <div class="event-content-wrap positioning-event-7">
+                        {{if gt (len .AllEvents) 3}}
                         <figure>
-                            <a href="#"><img src="/static/images/90.jpg" alt=""></a>
+                            <a href="/commentdetails/{{(index .AllEvents 3).ID}}"><img src="/static/images/90.jpg" alt=""></a>
                         </figure>
-
                         <header class="entry-header">
-                            <h3 class="entry-title">90’s Disco Night</h3>
+                            <h3 class="entry-title">{{(index .AllEvents 3).EventName}}</h3>
 
-                            <div class="posted-date">August 28</div>
+                            <div class="posted-date">{{(index .AllEvents 3).StartAtStr}}</div>
                         </header>
+                        {{end}}
                     </div>
 
                     <div class="event-content-wrap positioning-event-8">
+                        {{if gt (len .AllEvents) 4}}
                         <figure>
-                            <a href="#"><img src="/static/images/modern.jpg" alt="1"></a>
+                            <a href="/commentdetails/{{(index .AllEvents 4).ID}}"><img src="/static/images/modern.jpg" alt="1"></a>
                         </figure>
-
                         <header class="entry-header">
-                            <h3 class="entry-title">Modern Ballet</h3>
+                            <h3 class="entry-title">{{(index .AllEvents 4).EventName}}</h3>
 
-                            <div class="posted-date">August 25</div>
+                            <div class="posted-date">{{(index .AllEvents 4).StartAtStr}}</div>
                         </header>
+                        {{end}}
                     </div>
 
                     <div class="event-content-wrap positioning-event-9">
+                        {{if gt (len .AllEvents) 5}}
                         <figure>
-                            <a href="#"><img src="/static/images/smoke.jpg" alt=""></a>
+                            <a href="/commentdetails/{{(index .AllEvents 5).ID}}"><img src="/static/images/smoke.jpg" alt=""></a>
                         </figure>
-
                         <header class="entry-header">
-                            <h3 class="entry-title">Smoke show</h3>
+                            <h3 class="entry-title">{{(index .AllEvents 5).EventName}}</h3>
 
-                            <div class="posted-date">August 28</div>
+                            <div class="posted-date">{{(index .AllEvents 5).StartAtStr}}</div>
                         </header>
+                        {{end}}
                     </div>
 
                     <div class="event-content-wrap positioning-event-10 half">

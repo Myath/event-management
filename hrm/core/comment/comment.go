@@ -10,7 +10,7 @@ type CommentStore interface {
 	InsertComment(s storage.Comments) (*storage.Comments, error)
 	GetCommentID(id int) (*storage.Comments, error)
 	UpdateComment(s storage.Comments) (*storage.Comments, error)
-	CommentsOfEvent(id int) ([]storage.Comments, error)
+	CommentsOfEvent(eventID int) ([]storage.Comments, error)
 }
 
 type CoreComment struct {

@@ -33,7 +33,6 @@ func (p PostgresStorage) InsertEvent(s storage.Event) (*storage.Event, error){
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	if err := stmt.Get(&s, s); err != nil {
 		return nil, err
 	}
@@ -171,10 +170,10 @@ WHERE events.deleted_at IS NULL AND event_types.deleted_at IS NULL AND events.ev
 ORDER BY events.created_at DESC
 ;`
 
-func (p PostgresStorage) ListEventsUnderEventType(uf storage.EventFilter, eventTypeID int) ([]storage.Event, error) {
+func (p PostgresStorage) ListEventsUnderEventType(uf storage.EventFilter) ([]storage.Event, error) {
 
 	var event []storage.Event
-	if err := p.DB.Select(&event, listEventsUnderEventTypeQuery, eventTypeID, uf.SearchTerm); err != nil {
+	if err := p.DB.Select(&event, listEventsUnderEventTypeQuery,uf.EventTypeId, uf.SearchTerm); err != nil {
 		log.Println(err)
 		return nil, err
 	}

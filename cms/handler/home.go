@@ -29,7 +29,7 @@ type EventForHome struct {
 type EventForHomeFilter struct {
 	AllEvents  []EventForHome
 	SearchTerm string
-	UserID     string
+	SeUserID     string
 }
 
 func (h Handler) Home(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func (h Handler) Home(w http.ResponseWriter, r *http.Request) {
 	Data := EventForHomeFilter{
 		AllEvents:  allEvents,
 		SearchTerm: ad,
-		UserID:     userID,
+		SeUserID:     userID,
 	}
 
 	h.ParseHomeTemplate(w, Data)
