@@ -15,31 +15,31 @@
 <h5>HRM Config</h5>
 
 <p><b>[Server]</b></p>
-<p>host = 127.0.0.1</p>
-<p>port = 3000</p>
+<p>host =127.0.0.1</p>
+<p>port =3000</p>
 <p><b>[database]</b></p>
-<p>host = 127.0.0.1</p>
-<p>port = 5432</p>
-<p>dbname = event_hrm</p>
-<p>user = postgres</p>
-<p>password = secret</p>
-<p>sslmode = disabled</p>
+<p>host =127.0.0.1</p>
+<p>port =5432</p>
+<p>dbname =event_hrm</p>
+<p>user =postgres</p>
+<p>password =secret</p>
+<p>sslmode =disabled</p>
 <h5>CMS Config</h5>
 <p><b>[server]</b></p>
 <p>baseurl=http://127.0.0.1:4000</p>
-<p>port = "4000"</p>
+<p>port =4000</p>
 <p><b>[session]</b></p>
-<p>lifetime = 24</p>
-<p>idletime = 20</p>
+<p>lifetime =24</p>
+<p>idletime =20</p>
 <p><b>[database]</b></p>
-<p>host = 127.0.0.1</p>
-<p>Port = 5432</p>
-<p>dbname = event_session</p>
-<p>user = postgress</p>
-<p>password = secret</p>
-<p>sslmode = disables</p>
+<p>host =127.0.0.1</p>
+<p>Port =5432</p>
+<p>dbname =event_session</p>
+<p>user =postgress</p>
+<p>password =secret</p>
+<p>sslmode =disables</p>
 <p><b>[hrm]</b></p>
-<p>url = 127.0.0.1:3000</p>
+<p>url =127.0.0.1:3000</p>
 
 <h4>First To Need</h4>
 <ul>
